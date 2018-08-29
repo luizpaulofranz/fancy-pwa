@@ -1,3 +1,9 @@
+// polyfill to promises, to older browsers
+// is included in index.html
+if (!window.Promise) {
+   window.Promise = Promise;
+}
+
 // REGISTER OUR SW!
 // check if the browser supports serviceWorker
 if ('serviceWorker' in navigator) {
