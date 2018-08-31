@@ -34,6 +34,21 @@ self.addEventListener('install', function(event) {
 
 self.addEventListener('activate', function(event) {
     console.log('[Service Worker] Activating Service Worker');
+    // wait until we set remove the old cache before to do any fetch again
+    event.waitUntil(
+        caches.keys() // returns array of the keys of our caches ASYNC mode
+        .then(keyList => {
+            // Promise all takes an array of promises and waits all to finish
+            return Promise.all(
+                keyList.map( key => {
+                    if (key !== CACHE_STATIC_NAME && key !== CACHE_DYNAMIC_NAME) {
+                        console.log('[Service Worker] Removing old cache.', key);
+                        return caches.delete(key); //that's how we delete the cache
+                    }
+                })
+            );
+        })
+    );
     return self.clients.claim();
 });
 
