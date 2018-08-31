@@ -1,9 +1,9 @@
-# Progressive Web Apps - Complete Guide
-This source code is part of Maximilian Schwarzmüller's "Progressive Web Apps - Complete Guide" course on udemy.com.
+# Fancy PWA - Progressive Web Apps
+This source code is for studing purposes, here we build a instagram like app to test all the PWA resources available at this moment.
 
 # How to Use
-You need [Node.js](https://nodejs.org) installed on your machine. Simply download the installer from [nodejs.org](https://nodejs.org) and go through the installation steps.
+You need [Node.js](https://nodejs.org).
 
-Once Node.js is installed, open your command prompt or terminal and **navigate into this project folder**. There, run `npm install` to install all required dependencies.
+Once Node.js is installed, run `npm install` to install all required dependencies.
 
-Finally, run `npm start` to start the development server and visit [localhost:8080](http://localhost:8080) to see the running application.
+Finally, run `npm start` to start the development server to see the running application.
