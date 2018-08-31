@@ -1,3 +1,5 @@
+var CACHE_STATIC_NAME = 'static-v3';
+var CACHE_DYNAMIC_NAME = 'dynamic-v2';
 /** Adding Some Events */
 // on SW instalation, we set our first cache, to statics
 self.addEventListener('install', function(event) {
@@ -5,7 +7,7 @@ self.addEventListener('install', function(event) {
     // this wait simulates a SYNC code here, to finish the cache storage before go ahead
     // is important to finish the cache BEFORE other FETCH API calls
     event.waitUntil(
-        caches.open('static') //static is the name of this cache
+        caches.open(CACHE_STATIC_NAME) //static is the name of this cache
             .then(cache => {
                 console.log('[Service Worker] Precaching App Shell');
                 // we only pre-cache the home-page files
@@ -23,6 +25,8 @@ self.addEventListener('install', function(event) {
                     'https://fonts.googleapis.com/icon?family=Material+Icons',
                     'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
                 ]);
+                // add and addAll, perform the request em store the returned value, 
+                // if we have the content, then we must use put functions
                 //cache.add('/index.html')
             })
     )
@@ -36,14 +40,24 @@ self.addEventListener('activate', function(event) {
 self.addEventListener('fetch', function(event) {
     //console.log('[Service Worker] Fetching Something');
     event.respondWith(
-        caches.match(event.request) // this is how we get content from cache
+      caches.match(event.request)// this is how we get content from cache
         // it always returns on then function, even when the cache does not exists
-        .then(res => {
+        .then(response => {
             // so we have to trate it
-            if (res) {
-                return res;
-            } else {
-                return fetch(event.request);
+          if (response) {
+            return response;
+          } else {
+            return fetch(event.request)
+               // here we add to cache dynamically
+              .then(res => {
+                return caches.open(CACHE_DYNAMIC_NAME)
+                  .then( cache => { 
+                    // with put we se the URL and the content (different from add)
+                    //CLONE - response is a self consumer data, so we've to copy it
+                    cache.put(event.request.url, res.clone());
+                    return res;
+                  })
+              }).catch(err => {});
             }
         })
     );
