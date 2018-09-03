@@ -31,6 +31,20 @@ shareImageButton.addEventListener('click', openCreatePostModal);
 
 closeCreatePostModalButton.addEventListener('click', closeCreatePostModal);
 
+// way to create cache on demand by users, here we have access to caches object too 
+// we just need to handle a normal JS event, like click
+function onSaveButtonClick(event) {
+  console.log('Store cache on demand!');
+  if ('caches' in window) { 
+    caches.open('user-on-demand-cache')
+    .then(cache => {
+      cache.add('https://httpbin.org/get');
+      cache.add('/src/images/sf-boat.jpg');
+    })
+  }
+
+}
+
 // dummy test card example
 function createCard() {
   var cardWrapper = document.createElement('div');
@@ -50,6 +64,10 @@ function createCard() {
   cardSupportingText.className = 'mdl-card__supporting-text';
   cardSupportingText.textContent = 'In San Francisco';
   cardSupportingText.style.textAlign = 'center';
+  var cardSaveButton = document.createElement('button');
+  cardSaveButton.textContent = 'Save';
+  cardSaveButton.addEventListener('click', onSaveButtonClick)
+  cardSupportingText.appendChild(cardSaveButton);
   cardWrapper.appendChild(cardSupportingText);
   componentHandler.upgradeElement(cardWrapper);
   sharedMomentsArea.appendChild(cardWrapper);
