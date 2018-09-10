@@ -54,6 +54,7 @@ self.addEventListener('activate', function(event) {
     return self.clients.claim();
 });
 
+// CACHE WITH NETWORK FALLBACK STRATEGY
 self.addEventListener('fetch', function(event) {
     //console.log('[Service Worker] Fetching Something');
     event.respondWith(
@@ -86,3 +87,24 @@ self.addEventListener('fetch', function(event) {
         })
     );
 });
+
+/*
+// CACHE ONLY STRATEGY
+// needs a precache strategy, recommended only for assets requests
+self.addEventListener('fetch', function(event) {
+    event.respondWith(
+      // just returns what is already in cache
+      caches.match(event.request)
+    );
+});
+*/
+/*
+// NETWORK ONLY STRATEGY
+// ignores the local cache, this is the normal behavior, without SW and fetch event listner
+self.addEventListener('fetch', function(event) {
+    event.respondWith(
+      // just returns what is already in cache
+      fetch.match(event.request)
+    );
+});
+*/
