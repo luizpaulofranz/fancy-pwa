@@ -128,7 +128,10 @@ self.addEventListener('fetch', function(event) {
 */
 
 /*
-//CACHE THE NETWORK STRATEGY with dynamic cache, see feed.js too
+//CACHE THEN NETWORK STRATEGY with dynamic cache, see feed.js too
+// it is usefull in many cases, combines the best of network (data up to date)
+// and cache (fast and offline). We first return some from the cache, and then
+// requests to network an up to date version, replace the cache and the frontend.
 self.addEventListener('fetch', function(event) {
     event.respondWith(
       caches.open(CACHE_DYNAMIC_NAME)
