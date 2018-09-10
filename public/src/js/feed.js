@@ -73,6 +73,7 @@ function createCard() {
   sharedMomentsArea.appendChild(cardWrapper);
 }
 // here we simulate a request
+/*
 fetch('https://httpbin.org/get')
   .then(function(res) {
     return res.json();
@@ -80,3 +81,36 @@ fetch('https://httpbin.org/get')
   .then(function(data) {
     createCard(); // and call the dummy example
   });
+*/
+
+/** ###### CACHE THE NETWORK STRATEGY with dynamic cache ####### */
+// see sw.js too
+var url = 'https://httpbin.org/get';
+var networkDataReceived = false;
+
+fetch(url)
+  .then(function(res) {
+    return res.json();
+  })
+  .then(function(data) {
+    networkDataReceived = true;
+    console.log('From web', data);
+    clearCards();
+    createCard();
+  });
+
+if ('caches' in window) {
+  caches.match(url)
+    .then(function(response) {
+      if (response) {
+        return response.json();
+      }
+    })
+    .then(function(data) {
+      console.log('From cache', data);
+      if (!networkDataReceived) {
+        clearCards();
+        createCard();
+      }
+    });
+}

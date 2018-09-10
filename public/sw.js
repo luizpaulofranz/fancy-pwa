@@ -87,7 +87,25 @@ self.addEventListener('fetch', function(event) {
         })
     );
 });
-
+/*
+// NETWORK WITH CACHE FALLBACK STRATEGY
+// first attempt to network, if has no connection, then goes to cache
+// not the ideal solution because of slow internet timeout
+self.addEventListener('fetch', function(event) {
+    fetch(event.request) // attempt to internet, save cache and returns
+        // here we add to cache dynamically
+        .then(res => {
+        return caches.open(CACHE_DYNAMIC_NAME)
+            .then( cache => { 
+                cache.put(event.request.url, res.clone());
+                return res;
+            })
+        })
+        .catch(err => { // if offline, returns cache
+            caches.match(event.request);
+        })
+});
+*/
 /*
 // CACHE ONLY STRATEGY
 // needs a precache strategy, recommended only for assets requests
@@ -107,4 +125,20 @@ self.addEventListener('fetch', function(event) {
       fetch.match(event.request)
     );
 });
+*/
+
+/*
+//CACHE THE NETWORK STRATEGY with dynamic cache, see feed.js too
+self.addEventListener('fetch', function(event) {
+    event.respondWith(
+      caches.open(CACHE_DYNAMIC_NAME)
+        .then(function(cache) {
+          return fetch(event.request)
+            .then(function(res) {
+              cache.put(event.request, res.clone());
+              return res;
+            });
+        })
+    );
+  });
 */
