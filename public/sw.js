@@ -1,5 +1,5 @@
-var CACHE_STATIC_NAME = 'static-v3';
-var CACHE_DYNAMIC_NAME = 'dynamic-v2';
+var CACHE_STATIC_NAME = 'static-v6';
+var CACHE_DYNAMIC_NAME = 'dynamic-v3';
 /** Adding Some Events */
 // on SW instalation, we set our first cache, to statics
 self.addEventListener('install', function(event) {
@@ -13,6 +13,8 @@ self.addEventListener('install', function(event) {
                 // we only pre-cache the home-page files
                 cache.addAll([
                     '/',
+                    '/index.html',
+                    '/offline.html',
                     '/src/js/app.js',
                     '/src/js/feed.js',
                     '/src/js/promise.js',
@@ -72,7 +74,14 @@ self.addEventListener('fetch', function(event) {
                     cache.put(event.request.url, res.clone());
                     return res;
                   })
-              }).catch(err => {});
+              })
+              // on network error (no internet connection), returns our default offline page
+              .catch(err => {
+                return caches.open(CACHE_STATIC_NAME)
+                    .then(cache => {
+                        return cache.match('/offline.html')
+                    })
+              });
             }
         })
     );
