@@ -45,6 +45,12 @@ function onSaveButtonClick(event) {
 
 }
 
+function clearCards() {
+  while (sharedMomentsArea.hasChildNodes()) {
+    sharedMomentsArea.removeChild(sharedMomentsArea.lastChild);
+  }
+}
+
 // dummy test card example
 function createCard() {
   var cardWrapper = document.createElement('div');

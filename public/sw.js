@@ -1,5 +1,5 @@
-var CACHE_STATIC_NAME = 'static-v6';
-var CACHE_DYNAMIC_NAME = 'dynamic-v3';
+var CACHE_STATIC_NAME = 'static-v5';
+var CACHE_DYNAMIC_NAME = 'dynamic-v5';
 /** Adding Some Events */
 // on SW instalation, we set our first cache, to statics
 self.addEventListener('install', function(event) {
@@ -53,8 +53,9 @@ self.addEventListener('activate', function(event) {
     );
     return self.clients.claim();
 });
-
+/*
 // CACHE WITH NETWORK FALLBACK STRATEGY
+// the first strategy, not so usefull.
 self.addEventListener('fetch', function(event) {
     //console.log('[Service Worker] Fetching Something');
     event.respondWith(
@@ -87,6 +88,23 @@ self.addEventListener('fetch', function(event) {
         })
     );
 });
+*/
+
+//CACHE THE NETWORK STRATEGY with dynamic cache, see feed.js too
+// just save the content in cache and returns
+self.addEventListener('fetch', function(event) {
+    event.respondWith(
+      caches.open(CACHE_DYNAMIC_NAME)
+        .then(function(cache) {
+          return fetch(event.request)
+            .then(function(res) {
+              cache.put(event.request, res.clone());
+              return res;
+            });
+        })
+    );
+  });
+
 /*
 // NETWORK WITH CACHE FALLBACK STRATEGY
 // first attempt to network, if has no connection, then goes to cache
@@ -125,20 +143,4 @@ self.addEventListener('fetch', function(event) {
       fetch.match(event.request)
     );
 });
-*/
-
-/*
-//CACHE THE NETWORK STRATEGY with dynamic cache, see feed.js too
-self.addEventListener('fetch', function(event) {
-    event.respondWith(
-      caches.open(CACHE_DYNAMIC_NAME)
-        .then(function(cache) {
-          return fetch(event.request)
-            .then(function(res) {
-              cache.put(event.request, res.clone());
-              return res;
-            });
-        })
-    );
-  });
 */
