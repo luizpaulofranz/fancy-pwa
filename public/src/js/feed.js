@@ -92,6 +92,7 @@ fetch('https://httpbin.org/get')
 /** ###### CACHE THE NETWORK STRATEGY with dynamic cache ####### */
 // see sw.js too
 var url = 'https://httpbin.org/get';
+// if network is faster, don't replace content with cache
 var networkDataReceived = false;
 
 fetch(url)
