@@ -1,5 +1,22 @@
-var CACHE_STATIC_NAME = 'static-v6';
-var CACHE_DYNAMIC_NAME = 'dynamic-v6';
+var CACHE_STATIC_NAME = 'static-v2';
+var CACHE_DYNAMIC_NAME = 'dynamic-v2';
+var STATIC_FILES = [
+    '/',
+    '/index.html',
+    '/offline.html',
+    '/src/js/app.js',
+    '/src/js/feed.js',
+    '/src/js/promise.js',
+    '/src/js/fetch.js',
+    '/src/js/material.min.js',
+    '/src/css/app.css',
+    '/src/css/feed.css',
+    '/src/images/main-image.jpg',
+    'https://fonts.googleapis.com/css?family=Roboto:400,700',
+    'https://fonts.googleapis.com/icon?family=Material+Icons',
+    'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
+]
+
 /** Adding Some Events */
 // on SW instalation, we set our first cache, to statics
 self.addEventListener('install', function(event) {
@@ -11,22 +28,7 @@ self.addEventListener('install', function(event) {
             .then(cache => {
                 console.log('[Service Worker] Precaching App Shell');
                 // we only pre-cache the home-page files
-                cache.addAll([
-                    '/',
-                    '/index.html',
-                    '/offline.html',
-                    '/src/js/app.js',
-                    '/src/js/feed.js',
-                    '/src/js/promise.js',
-                    '/src/js/fetch.js',
-                    '/src/js/material.min.js',
-                    '/src/css/app.css',
-                    '/src/css/feed.css',
-                    '/src/images/main-image.jpg',
-                    'https://fonts.googleapis.com/css?family=Roboto:400,700',
-                    'https://fonts.googleapis.com/icon?family=Material+Icons',
-                    'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
-                ]);
+                cache.addAll(STATIC_FILES);
                 // add and addAll, perform the request em store the returned value, 
                 // if we have the content, then we must use put functions
                 //cache.add('/index.html')
@@ -53,6 +55,75 @@ self.addEventListener('activate', function(event) {
     );
     return self.clients.claim();
 });
+
+// CACHE THEN NETWORK STRATEGY with dynamic cache, see feed.js too
+// just save the content in cache and returns
+// it is usefull in many cases, combines the best of network (data up to date)
+// and cache (fast and offline). We first return some from the cache, and then
+// requests to network an up to date version, replace the cache and the frontend.
+// COMBINED WITH NETWORK WITH CACHE and CACHE ONLY ...
+self.addEventListener('fetch', function (event) {
+    console.log(event.request.url);
+    // here we trates different cache strategies to different requests ...
+    // CACHE THEN NETWORK
+    const url = 'https://httpbin.org/get';
+    if (event.request.url.indexOf(url) > -1) {
+        console.log('CACHE THEN NETWORK');
+        event.respondWith(
+        caches.open(CACHE_DYNAMIC_NAME)
+            .then(cache => {
+            return fetch(event.request)
+                .then(res => {
+                    cache.put(event.request, res.clone());
+                    return res;
+                });
+            })
+        );
+    // CACHE ONLY, for the static files
+    } else if (STATIC_FILES.indexOf(event.request.url) > -1) {
+        console.log('CACHE ONLY');
+        event.respondWith(
+            caches.match(event.request)
+        );
+    // NETWORK WITH CACHE
+    } else {
+        console.log('NETWORK WITH CACHE');
+        event.respondWith(
+            caches.match(event.request)// this is how we get content from cache
+            // it always returns on then function, even when the cache does not exists
+            .then(response => {
+                // so we have to trate it
+                if (response) {
+                    return response;
+                } else {
+                    return fetch(event.request)
+                    // here we add to cache dynamically
+                    .then( res => {
+                        return caches.open(CACHE_DYNAMIC_NAME)
+                        .then(cache => {
+                            // with put we se the URL and the content (different from add)
+                            //CLONE - response is a self consumer data, so we've to copy it
+                            cache.put(event.request.url, res.clone());
+                            return res;
+                        })
+                    })
+                    // on network error (no internet connection), returns our default offline page
+                    .catch( err => {
+                        return caches.open(CACHE_STATIC_NAME)
+                        .then( cache => {
+                            // only returns if the request is a page, and not a file
+                            // doesn't not make sense send offline.html instead of a CSS file
+                            if (event.request.url.indexOf('/help')) {
+                                return cache.match('/offline.html');
+                            }
+                        });
+                    });
+                }
+            })
+        );
+    }
+});
+
 /*
 // CACHE WITH NETWORK FALLBACK STRATEGY
 // the first strategy, not so usefull.
@@ -89,60 +160,6 @@ self.addEventListener('fetch', function(event) {
     );
 });
 */
-
-// CACHE THEN NETWORK STRATEGY with dynamic cache, see feed.js too
-// COMBINED WITH NETWORK WITH CACHE ...
-// just save the content in cache and returns
-// it is usefull in many cases, combines the best of network (data up to date)
-// and cache (fast and offline). We first return some from the cache, and then
-// requests to network an up to date version, replace the cache and the frontend.
-self.addEventListener('fetch', function(event) {
-    let url = 'https://httpbin.org/get';
-    // here we trates different cache strategies to different requsts ...
-    if (event.request.url.indexOf(url) > -1) {
-        event.respondWith(
-        caches.open(CACHE_DYNAMIC_NAME)
-            .then(function(cache) {
-            return fetch(event.request)
-                .then(function(res) {
-                cache.put(event.request, res.clone());
-                return res;
-                });
-            })
-        );
-    } else {
-        event.respondWith(
-            caches.match(event.request)// this is how we get content from cache
-            // it always returns on then function, even when the cache does not exists
-            .then(response => {
-                // so we have to trate it
-            if (response) {
-                return response;
-            } else {
-                return fetch(event.request)
-                // here we add to cache dynamically
-                .then(res => {
-                    return caches.open(CACHE_DYNAMIC_NAME)
-                    .then( cache => { 
-                        // with put we se the URL and the content (different from add)
-                        //CLONE - response is a self consumer data, so we've to copy it
-                        cache.put(event.request.url, res.clone());
-                        return res;
-                    })
-                })
-                // on network error (no internet connection), returns our default offline page
-                .catch(err => {
-                    return caches.open(CACHE_STATIC_NAME)
-                        .then(cache => {
-                            return cache.match('/offline.html')
-                        })
-                });
-                }
-            })
-        );
-    }
-  });
-
 /*
 // NETWORK WITH CACHE FALLBACK STRATEGY
 // first attempt to network, if has no connection, then goes to cache
