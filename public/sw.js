@@ -111,9 +111,10 @@ self.addEventListener('fetch', function (event) {
                     .catch( err => {
                         return caches.open(CACHE_STATIC_NAME)
                         .then( cache => {
-                            // only returns if the request is a page, and not a file
+                            // only returns if the request is a page, and not a CSS or JS file
                             // doesn't not make sense send offline.html instead of a CSS file
-                            if (event.request.url.indexOf('/help')) {
+                            // you can do this for images for example, returning a dummy img
+                            if (event.request.headers.get('accept').includes('text/html')) {
                                 return cache.match('/offline.html');
                             }
                         });
