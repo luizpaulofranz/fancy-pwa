@@ -17,6 +17,22 @@ var STATIC_FILES = [
     'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
 ]
 
+// helper function to keep our cache under control
+// call it on add new dynamic caches, or wherever you want
+function trimCache(cacheName, maxSize) {
+    caches.open(cacheName)
+    .then(cache => {
+        return cache.keys()
+    })
+    .then(keys => {
+        if (keys.length > maxSize) {
+            // we delete the most old cache and call own func again
+            cache.delete(keys[0])
+            then(trimCache(cacheName, maxSize));
+        }
+    })
+}
+
 /** Adding Some Events */
 // on SW instalation, we set our first cache, to statics
 self.addEventListener('install', function(event) {
