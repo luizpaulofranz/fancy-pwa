@@ -1,5 +1,6 @@
-var CACHE_STATIC_NAME = 'static-v2';
-var CACHE_DYNAMIC_NAME = 'dynamic-v2';
+var CACHE_STATIC_NAME = 'static-v1';
+var CACHE_DYNAMIC_NAME = 'dynamic-v1';
+var MAX_CACHE_SIZE = 20;
 var STATIC_FILES = [
     '/',
     '/index.html',
@@ -26,7 +27,7 @@ function trimCache(cacheName, maxSize) {
     })
     .then(keys => {
         if (keys.length > maxSize) {
-            // we delete the most old cache and call own func again
+            // we delete the oldest cache and call own func again
             cache.delete(keys[0])
             then(trimCache(cacheName, maxSize));
         }
@@ -90,6 +91,8 @@ self.addEventListener('fetch', function (event) {
             .then(cache => {
             return fetch(event.request)
                 .then(res => {
+                    // control our cache growing
+                    trimCache(CACHE_DYNAMIC_NAME, MAX_CACHE_SIZE);
                     cache.put(event.request, res.clone());
                     return res;
                 });
@@ -117,6 +120,8 @@ self.addEventListener('fetch', function (event) {
                     .then( res => {
                         return caches.open(CACHE_DYNAMIC_NAME)
                         .then(cache => {
+                            // control our cache growing
+                            trimCache(CACHE_DYNAMIC_NAME, MAX_CACHE_SIZE);
                             // with put we se the URL and the content (different from add)
                             //CLONE - response is a self consumer data, so we've to copy it
                             cache.put(event.request.url, res.clone());
