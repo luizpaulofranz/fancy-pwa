@@ -1,5 +1,5 @@
-var CACHE_STATIC_NAME = 'static-v1';
-var CACHE_DYNAMIC_NAME = 'dynamic-v1';
+var CACHE_STATIC_NAME = 'static-v2';
+var CACHE_DYNAMIC_NAME = 'dynamic-v2';
 var MAX_CACHE_SIZE = 20;
 var STATIC_FILES = [
     '/',
@@ -83,7 +83,7 @@ self.addEventListener('fetch', function (event) {
     console.log(event.request.url);
     // here we trates different cache strategies to different requests ...
     // CACHE THEN NETWORK
-    const url = 'https://httpbin.org/get';
+    const url = 'https://fancy-pwagram.firebaseio.com/posts';
     if (event.request.url.indexOf(url) > -1) {
         console.log('CACHE THEN NETWORK');
         event.respondWith(

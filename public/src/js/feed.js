@@ -62,23 +62,23 @@ function clearCards() {
 }
 
 // dummy test card example
-function createCard() {
+function createCard(data) {
   var cardWrapper = document.createElement('div');
   cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
   var cardTitle = document.createElement('div');
   cardTitle.className = 'mdl-card__title';
-  cardTitle.style.backgroundImage = 'url("/src/images/sf-boat.jpg")';
+  cardTitle.style.backgroundImage = `url("${data.image}")`;
   cardTitle.style.backgroundSize = 'cover';
   cardTitle.style.height = '180px';
   cardTitle.style.color = 'white';
   cardWrapper.appendChild(cardTitle);
   var cardTitleTextElement = document.createElement('h2');
   cardTitleTextElement.className = 'mdl-card__title-text';
-  cardTitleTextElement.textContent = 'San Francisco Trip';
+  cardTitleTextElement.textContent = data.title;
   cardTitle.appendChild(cardTitleTextElement);
   var cardSupportingText = document.createElement('div');
   cardSupportingText.className = 'mdl-card__supporting-text';
-  cardSupportingText.textContent = 'In San Francisco';
+  cardSupportingText.textContent = data.location;
   cardSupportingText.style.textAlign = 'center';
   /*var cardSaveButton = document.createElement('button');
   cardSaveButton.textContent = 'Save';
@@ -88,22 +88,28 @@ function createCard() {
   componentHandler.upgradeElement(cardWrapper);
   sharedMomentsArea.appendChild(cardWrapper);
 }
-// here we simulate a request
+
+function updateUi(data) {
+  clearCards();
+  for (let i = 0; i < data.lenght; i++) {
+    createCard(data[i]);
+  }
+}
 /*
-fetch('https://httpbin.org/get')
+fetch('https://fancy-pwagram.firebaseio.com/posts.json')
   .then(function(res) {
     return res.json();
   })
   .then(function(data) {
-    createCard(); // and call the dummy example
+    createCard(...data); // and call the dummy example
   });
 */
 
 /** ###### CACHE THEN NETWORK STRATEGY with dynamic cache ####### */
 // see sw.js too
-var url = 'https://httpbin.org/get';
+const url = 'https://fancy-pwagram.firebaseio.com/posts.json';
 // if network is faster, don't replace content with cache
-var networkDataReceived = false;
+let networkDataReceived = false;
 
 fetch(url)
   .then(function(res) {
@@ -111,9 +117,8 @@ fetch(url)
   })
   .then(function(data) {
     networkDataReceived = true;
-    console.log('From web', data);
-    clearCards();
-    createCard();
+    //console.log('From web', data);
+    updateUi(...data);
   });
 
 if ('caches' in window) {
@@ -126,8 +131,7 @@ if ('caches' in window) {
     .then(function(data) {
       console.log('From cache', data);
       if (!networkDataReceived) {
-        clearCards();
-        createCard();
+        updateUi(...data);
       }
     });
 }
