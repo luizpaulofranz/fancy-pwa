@@ -63,6 +63,7 @@ function clearCards() {
 
 // dummy test card example
 function createCard(data) {
+  console.log('createCard: '+data);
   var cardWrapper = document.createElement('div');
   cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
   var cardTitle = document.createElement('div');
@@ -91,8 +92,9 @@ function createCard(data) {
 
 function updateUi(data) {
   clearCards();
-  for (let i = 0; i < data.lenght; i++) {
-    createCard(data[i]);
+  for (let elem of data) {
+    console.log('updateUi: '+elem);
+    createCard(elem);
   }
 }
 /*
@@ -111,14 +113,21 @@ const url = 'https://fancy-pwagram.firebaseio.com/posts.json';
 // if network is faster, don't replace content with cache
 let networkDataReceived = false;
 
+function firebaseReturnHelper(data) {
+  let retorno = [];
+  for (let key in data) {
+    retorno.push(data[key]); 
+  }
+  return retorno;
+}
+
 fetch(url)
   .then(function(res) {
     return res.json();
   })
   .then(function(data) {
     networkDataReceived = true;
-    //console.log('From web', data);
-    updateUi(...data);
+    updateUi(firebaseReturnHelper(data));
   });
 
 if ('caches' in window) {
@@ -129,9 +138,8 @@ if ('caches' in window) {
       }
     })
     .then(function(data) {
-      console.log('From cache', data);
       if (!networkDataReceived) {
-        updateUi(...data);
+        updateUi(firebaseReturnHelper(data));
       }
     });
 }
