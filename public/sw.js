@@ -1,12 +1,15 @@
-var CACHE_STATIC_NAME = 'static-v1';
-var CACHE_DYNAMIC_NAME = 'dynamic-v1';
-var MAX_CACHE_SIZE = 20;
-var STATIC_FILES = [
+importScripts('/src/js/idb.js');
+
+const CACHE_STATIC_NAME = 'static-v1';
+const CACHE_DYNAMIC_NAME = 'dynamic-v1';
+const MAX_CACHE_SIZE = 20;
+const STATIC_FILES = [
     '/',
     '/index.html',
     '/offline.html',
     '/src/js/app.js',
     '/src/js/feed.js',
+    '/src/js/idb.js',
     '/src/js/promise.js',
     '/src/js/fetch.js',
     '/src/js/material.min.js',
@@ -16,7 +19,17 @@ var STATIC_FILES = [
     'https://fonts.googleapis.com/css?family=Roboto:400,700',
     'https://fonts.googleapis.com/icon?family=Material+Icons',
     'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
-]
+];
+
+// here we use idexedDB throug idb.js lib
+// name, version, and callback wich returns a promise
+let dbPromise = idb.open('posts-store', 1, db => {
+    // check if exists
+    if(!db.objectStoreNames.contains('posts')) {
+        // here wll create a "table", name and PK, keyPath sets the primary key name
+        db.createObjectStore('posts', {keyPath: 'id'})
+    }
+});
 
 // helper function to keep our cache under control
 // call it on add new dynamic caches, or wherever you want
@@ -87,16 +100,23 @@ self.addEventListener('fetch', function (event) {
     if (event.request.url.indexOf(url) > -1) {
         console.log('CACHE THEN NETWORK');
         event.respondWith(
-        caches.open(CACHE_DYNAMIC_NAME)
-            .then(cache => {
-            return fetch(event.request)
+            fetch(event.request)
                 .then(res => {
-                    // control our cache growing
-                    trimCache(CACHE_DYNAMIC_NAME, MAX_CACHE_SIZE);
-                    cache.put(event.request, res.clone());
+                    let cloneRes = res.clone();
+                    // here we trate our data to persists in IndexedDB
+                    cloneRes.json()
+                        .then(data => {
+                            for (let key in data) {
+                                dbPromise.then(db => {
+                                    let tx = db.transaction('posts', 'readwrite');
+                                    let store = tx.objectStore('posts');
+                                    store.put(data[key]);
+                                    return tx.complete;
+                                })
+                            }
+                        });
                     return res;
-                });
-            })
+                })
         );
     // CACHE ONLY, for the static files
     } else if (STATIC_FILES.indexOf(event.request.url) > -1) {
