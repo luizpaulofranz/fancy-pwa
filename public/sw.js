@@ -1,4 +1,5 @@
 importScripts('/src/js/idb.js');
+importScripts('/src/js/dbUtility.js');
 
 const CACHE_STATIC_NAME = 'static-v1';
 const CACHE_DYNAMIC_NAME = 'dynamic-v1';
@@ -20,16 +21,6 @@ const STATIC_FILES = [
     'https://fonts.googleapis.com/icon?family=Material+Icons',
     'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css'
 ];
-
-// here we use idexedDB throug idb.js lib
-// name, version, and callback wich returns a promise
-let dbPromise = idb.open('posts-store', 1, db => {
-    // check if exists
-    if(!db.objectStoreNames.contains('posts')) {
-        // here wll create a "table", name and PK, keyPath sets the primary key name
-        db.createObjectStore('posts', {keyPath: 'id'})
-    }
-});
 
 // helper function to keep our cache under control
 // call it on add new dynamic caches, or wherever you want
@@ -107,12 +98,7 @@ self.addEventListener('fetch', function (event) {
                     cloneRes.json()
                         .then(data => {
                             for (let key in data) {
-                                dbPromise.then(db => {
-                                    let tx = db.transaction('posts', 'readwrite');
-                                    let store = tx.objectStore('posts');
-                                    store.put(data[key]);
-                                    return tx.complete;
-                                })
+                                writeData('posts', data[key]);
                             }
                         });
                     return res;
