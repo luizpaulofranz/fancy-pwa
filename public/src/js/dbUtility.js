@@ -24,6 +24,14 @@ function readAll(objectStore) {
         return store.getAll();
     })
 }
+// retrieve single row
+function getById(objectStore, id) {
+    return dbPromise.then(db => {
+        let tx = db.transaction(objectStore, 'readonly');
+        let store = tx.objectStore(objectStore);
+        return store.get(id);
+    })
+}
 // removes all rows
 function clearAll(objectStore) {
     return dbPromise.then(db => {
@@ -31,5 +39,17 @@ function clearAll(objectStore) {
         let store = tx.objectStore(objectStore);
         store.clear();
         return tx.complete;
+    })
+}
+// removes one row
+function deleteRow(objectStore, id) {
+    return dbPromise.then(db => {
+        let tx = db.transaction(objectStore, 'readwrite');
+        let store = tx.objectStore(objectStore);
+        store.delete(id);
+        return tx.complete;
+    })
+    .then(() => {
+        console.log('Item '+id+' deleted!');
     })
 }
