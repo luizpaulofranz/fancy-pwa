@@ -94,13 +94,17 @@ self.addEventListener('fetch', function (event) {
             fetch(event.request)
                 .then(res => {
                     let cloneRes = res.clone();
-                    // here we trate our data to persists in IndexedDB
-                    cloneRes.json()
-                        .then(data => {
-                            for (let key in data) {
-                                writeData('posts', data[key]);
-                            }
-                        });
+                    // first we clear our indexedDB (it is not the best approach)
+                    clearAll('posts').then(() => {
+                        // to access the fetch response and insert again
+                        return cloneRes.json() // return a promise
+                    })
+                    .then(data => {
+                        for (let key in data) {
+                            // here we use our idexedDB helper to insert data
+                            writeData('posts', data[key]);
+                        }
+                    });
                     return res;
                 })
         );
