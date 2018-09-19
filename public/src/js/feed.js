@@ -129,17 +129,27 @@ fetch(url)
     networkDataReceived = true;
     updateUi(firebaseReturnHelper(data));
   });
-
-if ('caches' in window) {
-  caches.match(url)
-    .then(function(response) {
-      if (response) {
-        return response.json();
-      }
-    })
-    .then(function(data) {
-      if (!networkDataReceived) {
-        updateUi(firebaseReturnHelper(data));
-      }
-    });
+/*
+if ('cache' in window) {
+    caches.match(url)
+      .then(function(response) {
+        if (response) {
+          return response.json();
+        }
+      })
+      .then(function(data) {
+        if (!networkDataReceived) {
+          updateUi(firebaseReturnHelper(data));
+        }
+      });
+  }
+*/
+// access data throug indexedDB
+if ('indexedDB' in window) {
+  readAll('posts').then(data => {
+    if (!networkDataReceived) {
+      console.log('From cache', data);
+      updateUi(data);
+    }
+  })
 }
