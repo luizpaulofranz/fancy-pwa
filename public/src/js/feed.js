@@ -5,7 +5,8 @@ var sharedMomentsArea = document.querySelector('#shared-moments');
 
 // we add here the code to show our install banner
 function openCreatePostModal() {
-  createPostArea.style.display = 'block';
+  // here we set our transform to open
+  createPostArea.style.transform = 'translateY(0)'
   // the banner is only possible to be showed after the browser tries to do it
   if (deferredPrompt) {
     deferredPrompt.prompt();
@@ -34,7 +35,8 @@ function openCreatePostModal() {
 }
 
 function closeCreatePostModal() {
-  createPostArea.style.display = 'none';
+  //createPostArea.style.display = 'none';
+  createPostArea.style.transform = 'translateY(100vh)';
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);

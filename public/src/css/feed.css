@@ -8,7 +8,11 @@
   top: 56px;
   background: white;
   text-align: center;
-  display: none;
+  /*display: none;*/
+  /*transform and transition works together, what is defined in transform, takes the "transition" time*/
+  /*translateY is like position top, if position top is 100% of viewport, the element is the hidden*/
+  transform: translateY(100vh);
+  transition: 0.6s;
 }
 
 .main-image {
