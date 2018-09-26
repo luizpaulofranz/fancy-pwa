@@ -157,6 +157,7 @@ if ('indexedDB' in window) {
   })
 }
 
+/* on form submition we use bacground sync */
 form.addEventListener('submit', event => {
   let title = document.querySelector('#title');
   let location = document.querySelector('#location');
@@ -173,7 +174,27 @@ form.addEventListener('submit', event => {
     // ready to check SW availability, returns a promise with SW instace
     navigator.serviceWorker.ready
     .then( sw => {
-      sw.sync.register('sync-new-post');
+      // prepare and store data indexedDB to use background sync
+      let post = {
+        id: new Date().toString(),
+        title: title.value,
+        location: location.value
+      }
+      // dbUtility.js funciton
+      writeData('sync-posts', post)
+      .then(() => {
+        // register background sync after insertion
+        return sw.sync.register('sync-new-post');
+      })
+      .then(() => {
+        let snackBar = document.querySelector('#confirmation-toast');
+        let data = {message: 'Your post was saved for syncing.'}
+        // MaterialSnackbar is a property offered by material design
+        snackBar.MaterialSnackbar.showSnackbar(data);
+      })
+      .catch( err => {
+        console.log(err);
+      });
     })
   }
 });

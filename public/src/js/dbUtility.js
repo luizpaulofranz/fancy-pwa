@@ -6,6 +6,10 @@ let dbPromise = idb.open('posts-store', 1, db => {
         // here wll create a "table", name and PK, keyPath sets the primary key name
         db.createObjectStore('posts', {keyPath: 'id'})
     }
+    // another "table" for background sync
+    if(!db.objectStoreNames.contains('sync-posts')) {
+        db.createObjectStore('sync-posts', {keyPath: 'id'})
+    }
 });
 // insert a single row
 function writeData (objectStore, data) {
