@@ -2,6 +2,7 @@ var shareImageButton = document.querySelector('#share-image-button');
 var createPostArea = document.querySelector('#create-post');
 var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
 var sharedMomentsArea = document.querySelector('#shared-moments');
+var form = document.querySelector('form');
 
 // we add here the code to show our install banner
 function openCreatePostModal() {
@@ -155,3 +156,24 @@ if ('indexedDB' in window) {
     }
   })
 }
+
+form.addEventListener('submit', event => {
+  let title = document.querySelector('#title');
+  let location = document.querySelector('#location');
+  event.preventDefault();
+
+  if(title.value.trim() == '' || location.value.trim() == '') {
+    alert('Please enter valid data!')
+    return;
+  }
+
+  closeCreatePostModal();
+  // here we check if our browser supports background sync
+  if ('servieWorker' in navigator && 'SyncManager' in Window) {
+    // ready to check SW availability, returns a promise with SW instace
+    navigator.serviceWorker.ready
+    .then( sw => {
+      sw.sync.register('sync-new-post');
+    })
+  }
+});
