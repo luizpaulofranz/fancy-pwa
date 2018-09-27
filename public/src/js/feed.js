@@ -3,6 +3,8 @@ var createPostArea = document.querySelector('#create-post');
 var closeCreatePostModalButton = document.querySelector('#close-create-post-modal-btn');
 var sharedMomentsArea = document.querySelector('#shared-moments');
 var form = document.querySelector('form');
+let titleInput = document.querySelector('#title');
+let locationInput = document.querySelector('#location');
 
 // we add here the code to show our install banner
 function openCreatePostModal() {
@@ -157,10 +159,28 @@ if ('indexedDB' in window) {
   })
 }
 
+function sendData() {
+  fetch(url,{
+    method: 'POST',
+    headers: {
+      'Content-Type' : 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify({
+      id: new Date().toISOString(),
+      title: titleInput.value,
+      location: locationInput.value,
+      image: '"https://firebasestorage.googleapis.com/v0/b/fancy-pwagram.appspot.com/o/sf-boat.jpg?alt=media&token=d8a1120b-7702-4622-ab65-4ed7f4ff74ab"'
+    })
+  })
+  .then((res) => {
+    console.log('Sent data.',res);
+    updateUi();
+  })
+}
+
 /* on form submition we use bacground sync */
 form.addEventListener('submit', event => {
-  let title = document.querySelector('#title');
-  let location = document.querySelector('#location');
   event.preventDefault();
 
   if(title.value.trim() == '' || location.value.trim() == '') {
@@ -177,8 +197,8 @@ form.addEventListener('submit', event => {
       // prepare and store data indexedDB to use background sync
       let post = {
         id: new Date().toString(),
-        title: title.value,
-        location: location.value
+        title: titleInput.value,
+        location: locationInput.value
       }
       // dbUtility.js funciton
       writeData('sync-posts', post)
@@ -196,5 +216,8 @@ form.addEventListener('submit', event => {
         console.log(err);
       });
     })
+  } else {
+    // if browser does not support background sync
+    sendData();
   }
 });
