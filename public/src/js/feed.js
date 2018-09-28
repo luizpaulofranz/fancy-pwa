@@ -170,7 +170,7 @@ function sendData() {
       id: new Date().toISOString(),
       title: titleInput.value,
       location: locationInput.value,
-      image: '"https://firebasestorage.googleapis.com/v0/b/fancy-pwagram.appspot.com/o/sf-boat.jpg?alt=media&token=d8a1120b-7702-4622-ab65-4ed7f4ff74ab"'
+      image: 'https://firebasestorage.googleapis.com/v0/b/fancy-pwagram.appspot.com/o/sf-boat.jpg?alt=media&token=d8a1120b-7702-4622-ab65-4ed7f4ff74ab'
     })
   })
   .then((res) => {
@@ -183,14 +183,14 @@ function sendData() {
 form.addEventListener('submit', event => {
   event.preventDefault();
 
-  if(title.value.trim() == '' || location.value.trim() == '') {
+  if(titleInput.value.trim() == '' || locationInput.value.trim() == '') {
     alert('Please enter valid data!')
     return;
   }
 
   closeCreatePostModal();
   // here we check if our browser supports background sync
-  if ('servieWorker' in navigator && 'SyncManager' in Window) {
+  if ('servieWorker' in navigator && 'SyncManager' in window) {
     // ready to check SW availability, returns a promise with SW instace
     navigator.serviceWorker.ready
     .then( sw => {
@@ -204,7 +204,7 @@ form.addEventListener('submit', event => {
       writeData('sync-posts', post)
       .then(() => {
         // register background sync after insertion
-        return sw.sync.register('sync-new-post');
+        return sw.sync.register('sync-new-posts');
       })
       .then(() => {
         let snackBar = document.querySelector('#confirmation-toast');

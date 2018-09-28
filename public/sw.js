@@ -1,8 +1,8 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/dbUtility.js');
 
-const CACHE_STATIC_NAME = 'static-v1';
-const CACHE_DYNAMIC_NAME = 'dynamic-v1';
+const CACHE_STATIC_NAME = 'static-v2';
+const CACHE_DYNAMIC_NAME = 'dynamic-v2';
 const MAX_CACHE_SIZE = 20;
 const STATIC_FILES = [
     '/',
@@ -26,21 +26,21 @@ const STATIC_FILES = [
 // call it on add new dynamic caches, or wherever you want
 function trimCache(cacheName, maxSize) {
     caches.open(cacheName)
-    .then(cache => {
-        return cache.keys()
-    })
-    .then(keys => {
-        if (keys.length > maxSize) {
-            // we delete the oldest cache and call own func again
-            cache.delete(keys[0])
-            then(trimCache(cacheName, maxSize));
-        }
-    })
+        .then(cache => {
+            return cache.keys()
+        })
+        .then(keys => {
+            if (keys.length > maxSize) {
+                // we delete the oldest cache and call own func again
+                cache.delete(keys[0])
+                then(trimCache(cacheName, maxSize));
+            }
+        })
 }
 
 /** Adding Some Events */
 // on SW instalation, we set our first cache, to statics
-self.addEventListener('install', function(event) {
+self.addEventListener('install', function (event) {
     console.log('[Service Worker] Installing Service Worker');
     // this wait simulates a SYNC code here, to finish the cache storage before go ahead
     // is important to finish the cache BEFORE other FETCH API calls
@@ -57,22 +57,22 @@ self.addEventListener('install', function(event) {
     )
 });
 
-self.addEventListener('activate', function(event) {
+self.addEventListener('activate', function (event) {
     console.log('[Service Worker] Activating Service Worker');
     // wait until we set remove the old cache before to do any fetch again
     event.waitUntil(
         caches.keys() // returns array of the keys of our caches ASYNC mode
-        .then(keyList => {
-            // Promise all takes an array of promises and waits all to finish
-            return Promise.all(
-                keyList.map( key => {
-                    if (key !== CACHE_STATIC_NAME && key !== CACHE_DYNAMIC_NAME) {
-                        console.log('[Service Worker] Removing old cache.', key);
-                        return caches.delete(key); //that's how we delete the cache
-                    }
-                })
-            );
-        })
+            .then(keyList => {
+                // Promise all takes an array of promises and waits all to finish
+                return Promise.all(
+                    keyList.map(key => {
+                        if (key !== CACHE_STATIC_NAME && key !== CACHE_DYNAMIC_NAME) {
+                            console.log('[Service Worker] Removing old cache.', key);
+                            return caches.delete(key); //that's how we delete the cache
+                        }
+                    })
+                );
+            })
     );
     return self.clients.claim();
 });
@@ -99,59 +99,59 @@ self.addEventListener('fetch', function (event) {
                         // to access the fetch response and insert again
                         return cloneRes.json() // return a promise
                     })
-                    .then(data => {
-                        for (let key in data) {
-                            // here we use our idexedDB helper to insert data
-                            writeData('posts', data[key]);
-                        }
-                    });
+                        .then(data => {
+                            for (let key in data) {
+                                // here we use our idexedDB helper to insert data
+                                writeData('posts', data[key]);
+                            }
+                        });
                     return res;
                 })
         );
-    // CACHE ONLY, for the static files
+        // CACHE ONLY, for the static files
     } else if (STATIC_FILES.indexOf(event.request.url) > -1) {
         console.log('CACHE ONLY');
         event.respondWith(
             caches.match(event.request)
         );
-    // NETWORK WITH CACHE
+        // NETWORK WITH CACHE
     } else {
         console.log('NETWORK WITH CACHE');
         event.respondWith(
             caches.match(event.request)// this is how we get content from cache
-            // it always returns on then function, even when the cache does not exists
-            .then(response => {
-                // so we have to trate it
-                if (response) {
-                    return response;
-                } else {
-                    return fetch(event.request)
-                    // here we add to cache dynamically
-                    .then( res => {
-                        return caches.open(CACHE_DYNAMIC_NAME)
-                        .then(cache => {
-                            // control our cache growing
-                            trimCache(CACHE_DYNAMIC_NAME, MAX_CACHE_SIZE);
-                            // with put we se the URL and the content (different from add)
-                            //CLONE - response is a self consumer data, so we've to copy it
-                            cache.put(event.request.url, res.clone());
-                            return res;
-                        })
-                    })
-                    // on network error (no internet connection), returns our default offline page
-                    .catch( err => {
-                        return caches.open(CACHE_STATIC_NAME)
-                        .then( cache => {
-                            // only returns if the request is a page, and not a CSS or JS file
-                            // doesn't not make sense send offline.html instead of a CSS file
-                            // you can do this for images for example, returning a dummy img
-                            if (event.request.headers.get('accept').includes('text/html')) {
-                                return cache.match('/offline.html');
-                            }
-                        });
-                    });
-                }
-            })
+                // it always returns on then function, even when the cache does not exists
+                .then(response => {
+                    // so we have to trate it
+                    if (response) {
+                        return response;
+                    } else {
+                        return fetch(event.request)
+                            // here we add to cache dynamically
+                            .then(res => {
+                                return caches.open(CACHE_DYNAMIC_NAME)
+                                    .then(cache => {
+                                        // control our cache growing
+                                        trimCache(CACHE_DYNAMIC_NAME, MAX_CACHE_SIZE);
+                                        // with put we se the URL and the content (different from add)
+                                        //CLONE - response is a self consumer data, so we've to copy it
+                                        cache.put(event.request.url, res.clone());
+                                        return res;
+                                    })
+                            })
+                            // on network error (no internet connection), returns our default offline page
+                            .catch(err => {
+                                return caches.open(CACHE_STATIC_NAME)
+                                    .then(cache => {
+                                        // only returns if the request is a page, and not a CSS or JS file
+                                        // doesn't not make sense send offline.html instead of a CSS file
+                                        // you can do this for images for example, returning a dummy img
+                                        if (event.request.headers.get('accept').includes('text/html')) {
+                                            return cache.match('/offline.html');
+                                        }
+                                    });
+                            });
+                    }
+                })
         );
     }
 });
@@ -231,3 +231,48 @@ self.addEventListener('fetch', function(event) {
     );
 });
 */
+
+// background sync
+// triggers when we have connection and we have events to sync (sync.register(...) on feed.js)
+self.addEventListener('sync', function (event) {
+    console.log('[Service Worker] Background syncing', event);
+    // check what back sync is
+    if (event.tag === 'sync-new-posts') {
+        const url = 'https://fancy-pwagram.firebaseio.com/posts';
+        console.log('[Service Worker] Syncing new Posts');
+        // force waiting the data sending
+        event.waitUntil(
+            // get all our requests stored in indexedDB
+            readAll('sync-posts')
+                .then( data => {
+                    // loop throug our stored requests, fetching and the deleting
+                    for (var dt of data) {
+                        fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                id: dt.id,
+                                title: dt.title,
+                                location: dt.location,
+                                image: 'https://firebasestorage.googleapis.com/v0/b/fancy-pwagram.appspot.com/o/sf-boat.jpg?alt=media&token=d8a1120b-7702-4622-ab65-4ed7f4ff74ab'
+                            })
+                        })
+                        // after fetc, we delete de data
+                        .then( res => {
+                            console.log('Sent data', res);
+                            if (res.ok) {
+                                deleteRow('sync-posts', dt.id); // Isn't working correctly! ASYNC issue
+                            }
+                        })
+                        .catch(function (err) {
+                            console.log('Error while sending data', err);
+                        });
+                    }
+
+                })
+        );
+    }
+});
