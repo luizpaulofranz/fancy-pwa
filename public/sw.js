@@ -87,7 +87,7 @@ self.addEventListener('fetch', function (event) {
     console.log(event.request.url);
     // here we trates different cache strategies to different requests ...
     // CACHE THEN NETWORK
-    const url = 'https://fancy-pwagram.firebaseio.com/posts';
+    const url = 'https://us-central1-fancy-pwagram.cloudfunctions.net/storePostsData';
     if (event.request.url.indexOf(url) > -1) {
         console.log('CACHE THEN NETWORK');
         event.respondWith(
@@ -238,7 +238,7 @@ self.addEventListener('sync', function (event) {
     console.log('[Service Worker] Background syncing', event);
     // check what back sync is
     if (event.tag === 'sync-new-posts') {
-        const url = 'https://fancy-pwagram.firebaseio.com/posts';
+        const url = 'https://us-central1-fancy-pwagram.cloudfunctions.net/storePostsData';
         console.log('[Service Worker] Syncing new Posts');
         // force waiting the data sending
         event.waitUntil(
@@ -264,7 +264,10 @@ self.addEventListener('sync', function (event) {
                         .then( res => {
                             console.log('Sent data', res);
                             if (res.ok) {
-                                deleteRow('sync-posts', dt.id); // Isn't working correctly! ASYNC issue
+                                res.json().then(resData => {
+                                    // here we delete the data by ID returned by our custom firebase endpoint
+                                    deleteRow('sync-posts', resData.id);
+                                })
                             }
                         })
                         .catch(function (err) {

@@ -114,7 +114,7 @@ fetch('https://fancy-pwagram.firebaseio.com/posts.json')
 
 /** ###### CACHE THEN NETWORK STRATEGY with dynamic cache ####### */
 // see sw.js too
-const url = 'https://fancy-pwagram.firebaseio.com/posts.json';
+const url = 'https://us-central1-fancy-pwagram.cloudfunctions.net/storePostsData';
 // if network is faster, don't replace content with cache
 let networkDataReceived = false;
 
