@@ -1,3 +1,5 @@
+var deferredPrompt;
+var enableNotification = document.querySelectorAll('.enable-notifications');
 // polyfill to promises, to older browsers
 // is included in index.html
 if (!window.Promise) {
@@ -15,10 +17,38 @@ if ('serviceWorker' in navigator) {
 }
 // trate it to show the install banner when we click on specific button
 // so here we cancel the default show banner event to handle ir latter
-var deferredPrompt;
 window.addEventListener('beforeinstallprompt', function(){
     console.log('beforeinstallprompt was fired.');
     event.preventDefault()
     deferredPrompt = event;
     return false;
-})
+});
+
+function displayConfirmNotification() {
+    let options = {
+        body: 'You\'ve successfully subscribed to our Notification service!'
+    };
+    new Notification('Successfully subscribed!', options);
+}
+
+// ask permission to send notifications on browser
+function askNotificationPermission() {
+    // Notification object
+    Notification.requestPermission(result => {
+        console.log('User Permission Notification: ', result);
+        if (result != 'granted') {
+            console.log('User deny Notifications.', result);
+        } else {
+            displayConfirmNotification();
+        }
+    });
+}
+
+// check if browser supports Notification API
+if ('Notification' in window) {
+    for (let i = 0; i < enableNotification.length; i++) {
+        // if yes, we show up the buttons
+        enableNotification[i].style.display = 'inline-block';
+        enableNotification[i].addEventListener('click', askNotificationPermission);
+    }
+}
