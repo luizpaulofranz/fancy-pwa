@@ -28,7 +28,15 @@ function displayConfirmNotification() {
     let options = {
         body: 'You\'ve successfully subscribed to our Notification service!'
     };
-    new Notification('Successfully subscribed!', options);
+    // here we use SW to show notification
+    if ('serviceWorker' in navigator) {
+        // returns a promise with our active SW
+        navigator.serviceWorker.ready.then(sw => {
+            sw.showNotification('Successfully subscribed!', options);
+        })
+    }
+    // we can use notificartions without SW, but only SW can react to push
+    //new Notification('Successfully subscribed!', options);
 }
 
 // ask permission to send notifications on browser
