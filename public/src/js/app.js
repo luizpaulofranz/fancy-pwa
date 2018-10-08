@@ -26,7 +26,12 @@ window.addEventListener('beforeinstallprompt', function(){
 
 function displayConfirmNotification() {
     let options = {
-        body: 'You\'ve successfully subscribed to our Notification service!'
+        body: 'You\'ve successfully subscribed to our Notification service!',
+        icon: '/src/images/icons/app-icon-96x96.png',
+        image: '/src/images/sf-boat.jpg',
+        dir: 'ltr', // direction: left to right
+        lang: 'pt-BR',
+        vibrate: [100, 50, 200], // vibration pattern
     };
     // here we use SW to show notification
     if ('serviceWorker' in navigator) {
