@@ -32,6 +32,9 @@ function displayConfirmNotification() {
         dir: 'ltr', // direction: left to right
         lang: 'pt-BR',
         vibrate: [100, 50, 200], // vibration pattern
+        badge: '/src/images/icons/app-icon-96x96.png', // icon to android nitification bar
+        tag: 'enable-notification', // identifier that allows to "group" notifications with same tag
+        renotify: true, // renotifies user when new tagged notification comes 
     };
     // here we use SW to show notification
     if ('serviceWorker' in navigator) {
