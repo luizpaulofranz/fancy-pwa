@@ -35,6 +35,11 @@ function displayConfirmNotification() {
         badge: '/src/images/icons/app-icon-96x96.png', // icon to android nitification bar
         tag: 'enable-notification', // identifier that allows to "group" notifications with same tag
         renotify: true, // renotifies user when new tagged notification comes 
+        // actions showed with notification, not suported for all devices
+        actions: [
+            { action: 'confirm', title: 'Okay', icon: '/src/images/icons/app-icon-96x96.png' },
+            { action: 'cancel', title: 'Cancel', icon: '/src/images/icons/app-icon-96x96.png' }
+        ]
     };
     // here we use SW to show notification
     if ('serviceWorker' in navigator) {

@@ -279,3 +279,20 @@ self.addEventListener('sync', function (event) {
         );
     }
 });
+
+// notification actions clicks handlers
+self.addEventListener('notificationclick', event => {
+    const notification = event.notification;
+    const action = event.action;
+
+    console.log(notification);
+
+    // tha's how we handle with multiple actions on notification
+    if (action == 'confirm') {
+        console.log('Confirm was clicked!');
+    } else {
+        console.log(action);
+    }
+
+    notification.close();
+});
