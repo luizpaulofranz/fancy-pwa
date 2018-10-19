@@ -296,3 +296,7 @@ self.addEventListener('notificationclick', event => {
 
     notification.close();
 });
+// we can react to close without click above on notifications
+self.addEventListener('notificationclose', event => {
+    console.log("Notification was closed!",event.notification)
+});
