@@ -114,7 +114,7 @@ fetch('https://fancy-pwagram.firebaseio.com/posts.json')
 
 /** ###### CACHE THEN NETWORK STRATEGY with dynamic cache ####### */
 // see sw.js too
-const url = 'https://us-central1-fancy-pwagram.cloudfunctions.net/storePostsData';
+const url = 'https://fancy-pwagram.firebaseio.com/posts.json';
 // if network is faster, don't replace content with cache
 let networkDataReceived = false;
 
@@ -160,7 +160,7 @@ if ('indexedDB' in window) {
 }
 
 function sendData() {
-  fetch(url,{
+  fetch('https://us-central1-fancy-pwagram.cloudfunctions.net/storePostsData',{
     method: 'POST',
     headers: {
       'Content-Type' : 'application/json',
