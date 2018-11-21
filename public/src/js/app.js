@@ -68,6 +68,12 @@ function configPushSubscription() {
     .then(subscriptions => {
         if (subscriptions === null) {
             // no subscriptions, create a new one
+            var vapidPublicKey = 'BKapuZ3XLgt9UZhuEkodCrtnfBo9Smo-w1YXCIH8YidjHOFAU6XHpEnXefbuYslZY9vtlEnOAmU7Mc-kWh4gfmE';
+            var convertedVapidPublicKey = urlBase64ToUint8Array(vapidPublicKey);
+            return reg.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: convertedVapidPublicKey
+            });
         } else {
             // that's how we subscribe another push server
             srvcWrkr.pushManager.subscribe({
@@ -76,6 +82,24 @@ function configPushSubscription() {
             // there is a subscription, lets use the same 
         }
     })
+    .then(function(newSub) {
+        return fetch('https://pwagram-99adf.firebaseio.com/subscriptions.json', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(newSub)
+        })
+      })
+      .then(function(res) {
+        if (res.ok) {
+          displayConfirmNotification();
+        }
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
 }
 
 // ask permission to send notifications on browser
