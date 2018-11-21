@@ -58,8 +58,10 @@ function configPushSubscription() {
         // we can't get server notifications without SWs
         return;
     }
+    let srvcWrkr;
     navigator.serviceWorker.ready
     .then(sw => {
+        srvcWrkr = sw;
         // getSubscriptions returns all existing subscriptions on this SW
         return sw.pushManager.getSubscription();
     })
@@ -67,6 +69,10 @@ function configPushSubscription() {
         if (subscriptions === null) {
             // no subscriptions, create a new one
         } else {
+            // that's how we subscribe another push server
+            srvcWrkr.pushManager.subscribe({
+                userVisibleOnly: true
+            })
             // there is a subscription, lets use the same 
         }
     })
