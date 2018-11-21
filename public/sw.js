@@ -1,8 +1,8 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/dbUtility.js');
 
-const CACHE_STATIC_NAME = 'static-v2';
-const CACHE_DYNAMIC_NAME = 'dynamic-v2';
+const CACHE_STATIC_NAME = 'static-v1';
+const CACHE_DYNAMIC_NAME = 'dynamic-v1';
 const MAX_CACHE_SIZE = 20;
 const STATIC_FILES = [
     '/',
@@ -280,7 +280,7 @@ self.addEventListener('sync', function (event) {
     }
 });
 
-// notification actions clicks handlers
+// notification actions clicks handlers (see app.js displayConfirmNotification...)
 self.addEventListener('notificationclick', event => {
     const notification = event.notification;
     const action = event.action;
@@ -296,7 +296,7 @@ self.addEventListener('notificationclick', event => {
 
     notification.close();
 });
-// we can react to close without click above on notifications
+// we can react to close without click above on notifications (swipe the notification out)
 self.addEventListener('notificationclose', event => {
-    console.log("Notification was closed!",event.notification)
+    console.log("Notification was closed!",event);
 });

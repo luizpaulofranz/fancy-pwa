@@ -52,6 +52,26 @@ function displayConfirmNotification() {
     //new Notification('Successfully subscribed!', options);
 }
 
+// to assign to the push notifications on backend
+function configPushSubscription() {
+    if (!("serviceWorker" in navigator)) {
+        // we can't get server notifications without SWs
+        return;
+    }
+    navigator.serviceWorker.ready
+    .then(sw => {
+        // getSubscriptions returns all existing subscriptions on this SW
+        return sw.pushManager.getSubscription();
+    })
+    .then(subscriptions => {
+        if (subscriptions === null) {
+            // no subscriptions, create a new one
+        } else {
+            // there is a subscription, lets use the same 
+        }
+    })
+}
+
 // ask permission to send notifications on browser
 function askNotificationPermission() {
     // Notification object
@@ -60,13 +80,15 @@ function askNotificationPermission() {
         if (result != 'granted') {
             console.log('User deny Notifications.', result);
         } else {
-            displayConfirmNotification();
+            // here we subscribe user in our backend push notifications
+            configPushSubscription()
+            //displayConfirmNotification();
         }
     });
 }
 
 // check if browser supports Notification API
-if ('Notification' in window) {
+if ('Notification' in window && "serviceWorker" in navigator) {
     for (let i = 0; i < enableNotification.length; i++) {
         // if yes, we show up the buttons
         enableNotification[i].style.display = 'inline-block';
