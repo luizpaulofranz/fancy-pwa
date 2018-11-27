@@ -1,8 +1,8 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/dbUtility.js');
 
-const CACHE_STATIC_NAME = 'static-v1';
-const CACHE_DYNAMIC_NAME = 'dynamic-v1';
+const CACHE_STATIC_NAME = 'static-v2';
+const CACHE_DYNAMIC_NAME = 'dynamic-v2';
 const MAX_CACHE_SIZE = 20;
 const STATIC_FILES = [
     '/',
@@ -300,3 +300,25 @@ self.addEventListener('notificationclick', event => {
 self.addEventListener('notificationclose', event => {
     console.log("Notification was closed!",event);
 });
+
+// this is the event which listen to PUSH NOTIFICATIONS
+self.addEventListener('push', function(event) {
+    console.log('Push Notification received', event);
+    // receive data from server
+    let data;
+  
+    if (event.data) {
+      data = JSON.parse(event.data.text());
+    }
+  
+    var options = {
+      body: data.content,
+      icon: '/src/images/icons/app-icon-96x96.png',
+      badge: '/src/images/icons/app-icon-96x96.png'
+    };
+  
+    event.waitUntil(
+        // and here we show the notification
+      self.registration.showNotification(data.title, options)
+    );
+  });
