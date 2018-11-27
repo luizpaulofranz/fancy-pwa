@@ -68,7 +68,7 @@ function configPushSubscription() {
     .then(subscriptions => {
         if (subscriptions === null) {
             // no subscriptions, create a new one
-            let vapidPublicKey = 'BBgIRiGR8guj31SXjKi07CzaWFj6hQ9wVzrdZMhYJweKQ849ZH6mMottIBECfC2O_1BPSVbUBtgpZr_nkjeF8SA';
+            let vapidPublicKey = 'BHBtOC2vztZ5OdzUuZxFzyZwyGaxWWdpj23W52MQi7AH_2O4VflSLFWHq21ZyV_naj8qM9XaQ7QVM7_pFSZNDxI';
             var convertedVapidPublicKey = urlBase64ToUint8Array(vapidPublicKey);
             return srvcWrkr.pushManager.subscribe({
                 userVisibleOnly: true,
