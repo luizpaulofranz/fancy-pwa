@@ -1,8 +1,8 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/dbUtility.js');
 
-const CACHE_STATIC_NAME = 'static-v2';
-const CACHE_DYNAMIC_NAME = 'dynamic-v2';
+const CACHE_STATIC_NAME = 'static-v1';
+const CACHE_DYNAMIC_NAME = 'dynamic-v1';
 const MAX_CACHE_SIZE = 20;
 const STATIC_FILES = [
     '/',
@@ -292,6 +292,23 @@ self.addEventListener('notificationclick', event => {
         console.log('Confirm was clicked!');
     } else {
         console.log(action);
+        event.waitUntil(
+            // clients is a SW variable, and contains all "clients" of THIS SW
+            clients.matchAll().then( clis => {
+                // we get the first client which is visible, normally the browser, in this case is the only client
+                const client = clis.find(function(c) {
+                    return c.visibilityState === 'visible';
+                });
+                // and here we navigate our PWA to the URL passed by the server
+                if (client !== undefined) {
+                    client.navigate(notification.data.url);
+                    client.focus();
+                } else {
+                    clients.openWindow(notification.data.url);
+                }
+                notification.close();
+            })
+        );
     }
 
     notification.close();
@@ -314,7 +331,11 @@ self.addEventListener('push', function(event) {
     var options = {
       body: data.content,
       icon: '/src/images/icons/app-icon-96x96.png',
-      badge: '/src/images/icons/app-icon-96x96.png'
+      badge: '/src/images/icons/app-icon-96x96.png',
+      // here we send aditional data to our notification, see "notificationclick" event
+      data: {
+        url: data.openUrl
+      }
     };
   
     event.waitUntil(

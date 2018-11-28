@@ -35,8 +35,13 @@ exports.storePostsData = functions.https.onRequest((request, response) => {
                         p256dh: sub.val().keys.p256dh
                     }
                 }
-            // THAT'S HOW WE SEND PUSH NOTIFICATIONS! second argument is the payload!
-            webpush.sendNotification(pushConfig, JSON.stringify({title: 'New Post', content: 'New post added!'}))
+            // THAT'S HOW WE SEND PUSH NOTIFICATIONS! second argument is the payload, we can send whatever we want!
+            webpush.sendNotification(pushConfig, JSON.stringify(
+                {
+                    title: 'New Post', 
+                    content: 'New post added!',
+                    openUrl: '/help' // by example for now
+                }))
                 .catch(err => {
                     console.log(err)
                 });
