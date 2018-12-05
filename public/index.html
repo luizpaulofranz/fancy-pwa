@@ -68,10 +68,11 @@
     </div>
     <main class="mdl-layout__content mat-typography">
       <div id="create-post">
-        <!-- to handle camera -->
+          <!-- to handle camera -->
           <video id="player" autoplay></video>
           <canvas id="canvas" width="320px" height="240px"></canvas>
           <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" id="capture-btn">Capture</button>
+          <!-- if browser does nos support this feature, we can upload a file -->
           <div id="pick-image">
             <h6>Pick an Image instead</h6>
             <input type="file" accept="image/*" id="image-picker">

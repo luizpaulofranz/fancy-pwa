@@ -5,11 +5,43 @@ var sharedMomentsArea = document.querySelector('#shared-moments');
 var form = document.querySelector('form');
 let titleInput = document.querySelector('#title');
 let locationInput = document.querySelector('#location');
+// camera handler feature selectors
+let videoPlayer = document.querySelector('#player');
+let canvasElement = document.querySelector('#canvas');
+let captureButton = document.querySelector('#capture-btn');
+let imagePicker = document.querySelector('#image-picker');
+let imagePickerArea = document.querySelector('#pick-image');
+
+//initialize the camera or the file picker, depending of device
+function initializeMediaPicker() {
+  // here we create a kind if polyfill, to use webkit and moz implementation in old browsers
+  if (!('mediaDevicer' in navigator)) {
+    // so we force the creation of this modern object
+    navigator.mediaDevices = {};
+  }
+  // here we check and add safari and mozilla old implementations
+  if (!('getUserMedia' in navigator.mediaDevices)) {
+    // constraint contains audio or video
+    // here we implement the browsers method "getUserMedia" if it does'nt exists
+    navigator.mediaDevices.getUserMedia = function(constraints) {
+      let getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+      // if none of webkit and moz implementations are present, so we can't do anything
+      if (!getUserMedia) {
+        return Promise.reject(new Error('getUserMedia is not implemented by your browser!'));
+      }
+      return new Promise((resolve, reject) => {
+        getUserMedia.call(navigator, constraints, resolve, reject);
+      });
+    }
+  }
+}
 
 // we add here the code to show our install banner
 function openCreatePostModal() {
   // here we set our transform to open
   createPostArea.style.transform = 'translateY(0)'
+  // initialize camera or file picker 
+  initializeMediaPicker();
   // the banner is only possible to be showed after the browser tries to do it
   if (deferredPrompt) {
     deferredPrompt.prompt();
