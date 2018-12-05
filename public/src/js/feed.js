@@ -34,6 +34,15 @@ function initializeMediaPicker() {
       });
     }
   }
+  // with the polyfills above, we always have access to this method
+  navigator.mediaDevices.getUserMedia({video:true})
+    .then( stream => {
+      videoPlayer.srcObject = stream;
+      videoPlayer.style.display = 'block';
+    })
+    .catch(error => {
+      imagePickerArea.style.display = 'block';
+    });
 }
 
 // we add here the code to show our install banner
@@ -72,6 +81,9 @@ function openCreatePostModal() {
 function closeCreatePostModal() {
   //createPostArea.style.display = 'none';
   createPostArea.style.transform = 'translateY(100vh)';
+  videoPlayer.style.display = 'none';
+  imagePickerArea.style.display = 'none';
+  canvasElement.style.display = 'none';
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);
