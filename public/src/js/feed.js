@@ -45,6 +45,19 @@ function initializeMediaPicker() {
     });
 }
 
+// here we capture a photo
+captureButton.addEventListener('click', (event) => {
+  canvasElement.style.display = 'block';
+  videoPlayer.style.display = 'none';
+  captureButton.style.display = 'none';
+  let context = canvasElement.getContext('2d');
+  context.drawImage(videoPlayer, 0, 0, canvas.width, videoPlayer.videoHeight / (videoPlayer.videoWidth / canvas.width));
+  // here we stop our video transmission
+  videoPlayer.srcObject.getVideoTracks().forEach(function(track) {
+    track.stop();
+  });
+});
+
 // we add here the code to show our install banner
 function openCreatePostModal() {
   // here we set our transform to open
