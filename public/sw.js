@@ -247,18 +247,16 @@ self.addEventListener('sync', function (event) {
                 .then( data => {
                     // loop throug our stored requests, fetching and the deleting
                     for (var dt of data) {
+                        // thats how we simulate a POST form submit
+                        let postData = new FormData();
+                        postData.add('id', dt.id);
+                        postData.add('title', dt.title);
+                        postData.add('location', dt.location);
+                        postData.add('file', dt.picture, dt.id+'.png');
+
                         fetch(url, {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                id: dt.id,
-                                title: dt.title,
-                                location: dt.location,
-                                image: 'https://firebasestorage.googleapis.com/v0/b/fancy-pwagram.appspot.com/o/sf-boat.jpg?alt=media&token=d8a1120b-7702-4622-ab65-4ed7f4ff74ab'
-                            })
+                            body: postData
                         })
                         // after fetc, we delete de data
                         .then( res => {

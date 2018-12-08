@@ -11,6 +11,7 @@ let canvasElement = document.querySelector('#canvas');
 let captureButton = document.querySelector('#capture-btn');
 let imagePicker = document.querySelector('#image-picker');
 let imagePickerArea = document.querySelector('#pick-image');
+let picture;
 
 //initialize the camera or the file picker, depending of device
 function initializeMediaPicker() {
@@ -56,6 +57,9 @@ captureButton.addEventListener('click', (event) => {
   videoPlayer.srcObject.getVideoTracks().forEach(function(track) {
     track.stop();
   });
+  // dataURItoBlob defined in dbUtility
+  // toDataUrl codify canvas element in base64
+  picture = dataURItoBlob(canvasElement.toDataURL());
 });
 
 // we add here the code to show our install banner
@@ -217,18 +221,16 @@ if ('indexedDB' in window) {
 }
 
 function sendData() {
+  let postData = new FormData();
+  let id = new Date().toISOString();
+  postData.add('id', id);
+  postData.add('title', titleInput.value);
+  postData.add('location', locationInput.value);
+  postData.add('file', picture, id+'.png');
+
   fetch('https://us-central1-fancy-pwagram.cloudfunctions.net/storePostsData',{
     method: 'POST',
-    headers: {
-      'Content-Type' : 'application/json',
-      'Accept': 'application/json'
-    },
-    body: JSON.stringify({
-      id: new Date().toISOString(),
-      title: titleInput.value,
-      location: locationInput.value,
-      image: 'https://firebasestorage.googleapis.com/v0/b/fancy-pwagram.appspot.com/o/sf-boat.jpg?alt=media&token=d8a1120b-7702-4622-ab65-4ed7f4ff74ab'
-    })
+    body: postData
   })
   .then((res) => {
     console.log('Sent data.',res);
@@ -255,7 +257,8 @@ form.addEventListener('submit', event => {
       let post = {
         id: new Date().toString(),
         title: titleInput.value,
-        location: locationInput.value
+        location: locationInput.value,
+        picture: picture
       }
       // dbUtility.js funciton
       writeData('sync-posts', post)
