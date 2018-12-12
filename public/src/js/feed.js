@@ -62,6 +62,11 @@ captureButton.addEventListener('click', (event) => {
   picture = dataURItoBlob(canvasElement.toDataURL());
 });
 
+// if have no camera
+imagePicker.addEventListener('change', function(event) {
+  picture = event.target.files[0];
+});
+
 // we add here the code to show our install banner
 function openCreatePostModal() {
   // here we set our transform to open
