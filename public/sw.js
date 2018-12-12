@@ -2,7 +2,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/dbUtility.js');
 
 const CACHE_STATIC_NAME = 'static-v2';
-const CACHE_DYNAMIC_NAME = 'dynamic-v1';
+const CACHE_DYNAMIC_NAME = 'dynamic-v2';
 const MAX_CACHE_SIZE = 20;
 const STATIC_FILES = [
     '/',
@@ -10,6 +10,7 @@ const STATIC_FILES = [
     '/offline.html',
     '/src/js/app.js',
     '/src/js/feed.js',
+    '/src/js/dbUtility.js',
     '/src/js/idb.js',
     '/src/js/promise.js',
     '/src/js/fetch.js',
@@ -249,10 +250,10 @@ self.addEventListener('sync', function (event) {
                     for (var dt of data) {
                         // thats how we simulate a POST form submit
                         let postData = new FormData();
-                        postData.add('id', dt.id);
-                        postData.add('title', dt.title);
-                        postData.add('location', dt.location);
-                        postData.add('file', dt.picture, dt.id+'.png');
+                        postData.append('id', dt.id);
+                        postData.append('title', dt.title);
+                        postData.append('location', dt.location);
+                        postData.append('file', dt.picture, dt.id+'.png');
 
                         fetch(url, {
                             method: 'POST',

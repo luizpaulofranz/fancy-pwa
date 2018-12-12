@@ -223,10 +223,10 @@ if ('indexedDB' in window) {
 function sendData() {
   let postData = new FormData();
   let id = new Date().toISOString();
-  postData.add('id', id);
-  postData.add('title', titleInput.value);
-  postData.add('location', locationInput.value);
-  postData.add('file', picture, id+'.png');
+  postData.append('title', titleInput.value);
+  postData.append('location', locationInput.value);
+  postData.append('file', picture, id+'.png');
+  postData.append('id', id);
 
   fetch('https://us-central1-fancy-pwagram.cloudfunctions.net/storePostsData',{
     method: 'POST',

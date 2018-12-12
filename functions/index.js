@@ -1,56 +1,136 @@
-const functions = require('firebase-functions');// to handle new endpoints or intercept them
-const admin = require('firebase-admin');// to access backend firebase resources, like DB
-const cors = require('cors')({origin:true});// to allow all origin access
-const webpush = require('web-push'); // to send web push messages
+var functions = require("firebase-functions");
+var admin = require("firebase-admin");
+var cors = require("cors")({ origin: true });
+var webpush = require("web-push");
+var fs = require("fs");
+var UUID = require("uuid-v4");
+var os = require("os");
+var Busboy = require("busboy");
+var path = require('path');
 
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
+//
 
-// setting up our firebase instance
 const serviceAccount = require("./pwagram-firebase-adminsdk-keyfile.json");
+
+var gcconfig = {
+  projectId: "fancy-pwagram",
+  keyFilename: "pwagram-firebase-adminsdk-keyfile.json"
+};
+
+var gcs = require("@google-cloud/storage")(gcconfig);
+
 admin.initializeApp({
-    databaseURL: 'https://fancy-pwagram.firebaseio.com/',
-    credential: admin.credential.cert(serviceAccount)
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://fancy-pwagram.firebaseio.com/"
 });
 
-exports.storePostsData = functions.https.onRequest((request, response) => {
-    // wrap to get cors headers
-    cors( request, response, () => {
-        // the table (or node), push to add new json object
-        admin.database().ref('posts').push({
-            id: request.body.id,
-            title: request.body.title,
-            location: request.body.location,
-            image: request.body.image
-        }).then( () => {
-            // email, pub key, priv key
-            webpush.setVapidDetails('mailto:luizpaulofranz@gmail.com', 'BHBtOC2vztZ5OdzUuZxFzyZwyGaxWWdpj23W52MQi7AH_2O4VflSLFWHq21ZyV_naj8qM9XaQ7QVM7_pFSZNDxI', 'JX9FZFKcqjkT-wba59wadj8g6XSrx8wvYMTjm0xqbNQ');
-            return admin.database().ref('subscriptions').once('value');// only fetch data once
-        }).then(subscriptions => {
-            subscriptions.forEach( sub => {
-                let pushConfig = {
+exports.storePostData = functions.https.onRequest(function(request, response) {
+  cors(request, response, function() {
+    var uuid = UUID();
+
+    const busboy = new Busboy({ headers: request.headers });
+    // These objects will store the values (file + fields) extracted from busboy
+    let upload;
+    const fields = {};
+
+    // This callback will be invoked for each file uploaded
+    busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
+      console.log(
+        `File [${fieldname}] filename: ${filename}, encoding: ${encoding}, mimetype: ${mimetype}`
+      );
+      const filepath = path.join(os.tmpdir(), filename);
+      upload = { file: filepath, type: mimetype };
+      file.pipe(fs.createWriteStream(filepath));
+    });
+
+    // This will invoked on every field detected
+    busboy.on('field', function(fieldname, val, fieldnameTruncated, valTruncated, encoding, mimetype) {
+      fields[fieldname] = val;
+    });
+
+    // This callback will be invoked after all uploaded files are saved.
+    busboy.on("finish", () => {
+      var bucket = gcs.bucket("fancy-pwagram.appspot.com");
+      bucket.upload(
+        upload.file,
+        {
+          uploadType: "media",
+          metadata: {
+            metadata: {
+              contentType: upload.type,
+              firebaseStorageDownloadTokens: uuid
+            }
+          }
+        },
+        function(err, uploadedFile) {
+          if (!err) {
+            admin
+              .database()
+              .ref("posts")
+              .push({
+                id: fields.id,
+                title: fields.title,
+                location: fields.location,
+                image:
+                  "https://firebasestorage.googleapis.com/v0/b/" +
+                  bucket.name +
+                  "/o/" +
+                  encodeURIComponent(uploadedFile.name) +
+                  "?alt=media&token=" +
+                  uuid
+              })
+              .then(function() {
+                webpush.setVapidDetails('mailto:luizpaulofranz@gmail.com', 'BHBtOC2vztZ5OdzUuZxFzyZwyGaxWWdpj23W52MQi7AH_2O4VflSLFWHq21ZyV_naj8qM9XaQ7QVM7_pFSZNDxI', 'JX9FZFKcqjkT-wba59wadj8g6XSrx8wvYMTjm0xqbNQ');
+                return admin
+                  .database()
+                  .ref("subscriptions")
+                  .once("value");
+              })
+              .then(function(subscriptions) {
+                subscriptions.forEach(function(sub) {
+                  var pushConfig = {
                     endpoint: sub.val().endpoint,
                     keys: {
-                        auth: sub.val().keys.auth,
-                        p256dh: sub.val().keys.p256dh
+                      auth: sub.val().keys.auth,
+                      p256dh: sub.val().keys.p256dh
                     }
-                }
-            // THAT'S HOW WE SEND PUSH NOTIFICATIONS! second argument is the payload, we can send whatever we want!
-            webpush.sendNotification(pushConfig, JSON.stringify(
-                {
-                    title: 'New Post', 
-                    content: 'New post added!',
-                    openUrl: '/help' // by example for now
-                }))
-                .catch(err => {
-                    console.log(err)
-                });
-            });
+                  };
 
-            response.status(201).json({message: "Data successfull stored!", id: request.body.id});
-        }).catch( err => {
-            response.status(500).json({error: err});
-        })
-    })
-    //response.send("Hello from Firebase!");
+                  webpush
+                    .sendNotification(
+                      pushConfig,
+                      JSON.stringify({
+                        title: "New Post",
+                        content: "New Post added!",
+                        openUrl: "/help"
+                      })
+                    )
+                    .catch(function(err) {
+                      console.log(err);
+                    });
+                });
+                response
+                  .status(201)
+                  .json({ message: "Data stored", id: fields.id });
+              })
+              .catch(function(err) {
+                response.status(500).json({ error: err });
+              });
+          } else {
+            console.log(err);
+          }
+        }
+      );
+    });
+
+    // The raw bytes of the upload will be in request.rawBody.  Send it to busboy, and get
+    // a callback when it's finished.
+    busboy.end(request.rawBody);
+    // formData.parse(request, function(err, fields, files) {
+    //   fs.rename(files.file.path, "/tmp/" + files.file.name);
+    //   var bucket = gcs.bucket("YOUR_PROJECT_ID.appspot.com");
+    // });
+  });
 });
