@@ -1,6 +1,6 @@
 var functions = require("firebase-functions");
 var admin = require("firebase-admin");
-var cors = require("cors")({ origin: true });
+const cors = require('cors')({origin: true});
 var webpush = require("web-push");
 var fs = require("fs");
 var UUID = require("uuid-v4");
@@ -26,7 +26,7 @@ admin.initializeApp({
   databaseURL: "https://fancy-pwagram.firebaseio.com/"
 });
 
-exports.storePostData = functions.https.onRequest(function(request, response) {
+exports.storePostsData = functions.https.onRequest(function(request, response) {
   cors(request, response, function() {
     var uuid = UUID();
 

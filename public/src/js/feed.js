@@ -163,8 +163,9 @@ function createCard(data) {
 
 function updateUi(data) {
   clearCards();
+  console.log('AQUII: ', data)
   for (let elem of data) {
-    console.log('updateUi: '+elem);
+    //console.log('updateUi: '+elem);
     createCard(elem);
   }
 }
@@ -198,6 +199,7 @@ fetch(url)
   })
   .then(function(data) {
     networkDataReceived = true;
+    console.log('Network response.');
     updateUi(firebaseReturnHelper(data));
   });
 /*
@@ -217,9 +219,10 @@ if ('cache' in window) {
 */
 // access data throug indexedDB
 if ('indexedDB' in window) {
+  // readAll is in dbUtility.js
   readAll('posts').then(data => {
+    console.log('Cache response.');
     if (!networkDataReceived) {
-      console.log('From cache', data);
       updateUi(data);
     }
   })
@@ -238,15 +241,14 @@ function sendData() {
     body: postData
   })
   .then((res) => {
-    console.log('Sent data.',res);
+    //console.log('Sent data.',res);
     updateUi();
   })
 }
 
-/* on form submition we use bacground sync */
+/* on form submition we use background sync */
 form.addEventListener('submit', event => {
   event.preventDefault();
-
   if(titleInput.value.trim() == '' || locationInput.value.trim() == '') {
     alert('Please enter valid data!')
     return;
@@ -254,7 +256,7 @@ form.addEventListener('submit', event => {
 
   closeCreatePostModal();
   // here we check if our browser supports background sync
-  if ('servieWorker' in navigator && 'SyncManager' in window) {
+  if ('serviceWorker' in navigator && 'SyncManager' in window) {
     // ready to check SW availability, returns a promise with SW instace
     navigator.serviceWorker.ready
     .then( sw => {

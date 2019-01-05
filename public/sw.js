@@ -1,8 +1,8 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/dbUtility.js');
 
-const CACHE_STATIC_NAME = 'static-v2';
-const CACHE_DYNAMIC_NAME = 'dynamic-v2';
+const CACHE_STATIC_NAME = 'static-v1';
+const CACHE_DYNAMIC_NAME = 'dynamic-v1';
 const MAX_CACHE_SIZE = 20;
 const STATIC_FILES = [
     '/',
@@ -85,12 +85,12 @@ self.addEventListener('activate', function (event) {
 // requests to network an up to date version, replace the cache and the frontend.
 // COMBINED WITH NETWORK WITH CACHE and CACHE ONLY ...
 self.addEventListener('fetch', function (event) {
-    console.log(event.request.url);
+    //console.log(event.request.url);
     // here we trates different cache strategies to different requests ...
     // CACHE THEN NETWORK
-    const url = 'https://us-central1-fancy-pwagram.cloudfunctions.net/storePostsData';
+    const url = 'https://fancy-pwagram.firebaseio.com/posts';
     if (event.request.url.indexOf(url) > -1) {
-        console.log('CACHE THEN NETWORK');
+        //console.log('CACHE THEN NETWORK');
         event.respondWith(
             fetch(event.request)
                 .then(res => {
@@ -111,13 +111,13 @@ self.addEventListener('fetch', function (event) {
         );
         // CACHE ONLY, for the static files
     } else if (STATIC_FILES.indexOf(event.request.url) > -1) {
-        console.log('CACHE ONLY');
+        //console.log('CACHE ONLY');
         event.respondWith(
             caches.match(event.request)
         );
         // NETWORK WITH CACHE
     } else {
-        console.log('NETWORK WITH CACHE');
+        //console.log('NETWORK WITH CACHE');
         event.respondWith(
             caches.match(event.request)// this is how we get content from cache
                 // it always returns on then function, even when the cache does not exists
@@ -266,6 +266,10 @@ self.addEventListener('sync', function (event) {
                                 res.json().then(resData => {
                                     // here we delete the data by ID returned by our custom firebase endpoint
                                     deleteRow('sync-posts', resData.id);
+                                    // and here clear the endpoint cache to re-save the cache
+                                    caches.open(CACHE_DYNAMIC_NAME).then(cache => {
+                                        return cache.delete('/posts.json');
+                                    });
                                 })
                             }
                         })
@@ -284,13 +288,13 @@ self.addEventListener('notificationclick', event => {
     const notification = event.notification;
     const action = event.action;
 
-    console.log(notification);
+    //console.log(notification);
 
     // tha's how we handle with multiple actions on notification
     if (action == 'confirm') {
-        console.log('Confirm was clicked!');
+        //console.log('Confirm was clicked!');
     } else {
-        console.log(action);
+        //console.log(action);
         event.waitUntil(
             // clients is a SW variable, and contains all "clients" of THIS SW
             clients.matchAll().then( clis => {
@@ -319,7 +323,7 @@ self.addEventListener('notificationclose', event => {
 
 // this is the event which listen to PUSH NOTIFICATIONS
 self.addEventListener('push', function(event) {
-    console.log('Push Notification received', event);
+    //console.log('Push Notification received', event);
     // receive data from server
     let data;
   
