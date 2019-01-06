@@ -4,7 +4,6 @@ var closeCreatePostModalButton = document.querySelector('#close-create-post-moda
 var sharedMomentsArea = document.querySelector('#shared-moments');
 var form = document.querySelector('form');
 let titleInput = document.querySelector('#title');
-let locationInput = document.querySelector('#location');
 // camera handler feature selectors
 let videoPlayer = document.querySelector('#player');
 let canvasElement = document.querySelector('#canvas');
@@ -12,8 +11,42 @@ let captureButton = document.querySelector('#capture-btn');
 let imagePicker = document.querySelector('#image-picker');
 let imagePickerArea = document.querySelector('#pick-image');
 let picture;
+// location vars
+let locationBtn = document.querySelector("#location-btn");
+let locationLoader = document.querySelector("#location-loader");
+let locationInput = document.querySelector("#location");
+let fetchedLocation;
 
-//initialize the camera or the file picker, depending of device
+locationBtn.addEventListener("click", () => {
+  if (!("geolocation" in navigator)) {
+    return;
+  }
+  locationBtn.style.display = 'none';
+  locationLoader.style.display = 'inline';
+  // 3 params, 1st is success callback, 2nd is failure and 3rd is config params
+  navigator.geolocation.getCurrentPosition( position => {
+    locationBtn.style.display = 'inline';
+    locationLoader.style.display = 'none';
+
+    fetchedLocation = { lat: position.coords.latitude, lng: 0 };
+    locationInput.value = 'Any Where';
+    document.querySelector("#manual-location").classList.add("is-focused");
+  }, err => {
+    console.log("Error on getCurrentPosition. ", err);
+    alert("We could'nt find a location, please enter manually.");
+    locationBtn.style.display = 'inline';
+    locationLoader.style.display = 'none';
+  }, { timeout: 7000 });
+});
+
+//initialize the location depending of device, used when we open the new post modal
+function initializeLocation() {
+  if (!("geolocation" in navigator)) {
+    locationBtn.style.display = 'none';
+  }
+}
+
+//initialize the camera or the file picker, depending of device, used when we open the new post modal
 function initializeMediaPicker() {
   // here we create a kind if polyfill, to use webkit and moz implementation in old browsers
   if (!('mediaDevicer' in navigator)) {
@@ -71,8 +104,9 @@ imagePicker.addEventListener('change', function(event) {
 function openCreatePostModal() {
   // here we set our transform to open
   createPostArea.style.transform = 'translateY(0)'
-  // initialize camera or file picker 
+  // initialize camera or file picker and GEO location support
   initializeMediaPicker();
+  initializeLocation();
   // the banner is only possible to be showed after the browser tries to do it
   if (deferredPrompt) {
     deferredPrompt.prompt();
@@ -106,6 +140,8 @@ function closeCreatePostModal() {
   videoPlayer.style.display = 'none';
   imagePickerArea.style.display = 'none';
   canvasElement.style.display = 'none';
+  locationLoader.style.display = 'none';
+  locationBtn.style.display = 'inline';
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);
@@ -233,6 +269,8 @@ function sendData() {
   let id = new Date().toISOString();
   postData.append('title', titleInput.value);
   postData.append('location', locationInput.value);
+  postData.append('rawLocationLat', fetchedLocation.lat);
+  postData.append('rawLocationLng', fetchedLocation.lng);
   postData.append('file', picture, id+'.png');
   postData.append('id', id);
 
@@ -265,7 +303,8 @@ form.addEventListener('submit', event => {
         id: new Date().toString(),
         title: titleInput.value,
         location: locationInput.value,
-        picture: picture
+        picture: picture,
+        rawLocation: fetchedLocation
       }
       // dbUtility.js funciton
       writeData('sync-posts', post)
