@@ -15,12 +15,13 @@ let picture;
 let locationBtn = document.querySelector("#location-btn");
 let locationLoader = document.querySelector("#location-loader");
 let locationInput = document.querySelector("#location");
-let fetchedLocation;
+let fetchedLocation = {lat: 0, lng: 0};
 
 locationBtn.addEventListener("click", () => {
   if (!("geolocation" in navigator)) {
     return;
   }
+  let sawAlert = false;
   locationBtn.style.display = 'none';
   locationLoader.style.display = 'inline';
   // 3 params, 1st is success callback, 2nd is failure and 3rd is config params
@@ -33,7 +34,11 @@ locationBtn.addEventListener("click", () => {
     document.querySelector("#manual-location").classList.add("is-focused");
   }, err => {
     console.log("Error on getCurrentPosition. ", err);
-    alert("We could'nt find a location, please enter manually.");
+    if (!sawAlert) {
+      alert("We could'nt find a location, please enter manually.");
+      sawAlert = true;
+    }
+    fetchedLocation = {lat: 0, lng: 0};
     locationBtn.style.display = 'inline';
     locationLoader.style.display = 'none';
   }, { timeout: 7000 });
@@ -102,8 +107,11 @@ imagePicker.addEventListener('change', function(event) {
 
 // we add here the code to show our install banner
 function openCreatePostModal() {
-  // here we set our transform to open
-  createPostArea.style.transform = 'translateY(0)'
+  // to update UI correctly, stop video takes a moment
+  setTimeout(function() {
+    // here we set our transform to open
+    createPostArea.style.transform = 'translateY(0)'
+  }, 1000);
   // initialize camera or file picker and GEO location support
   initializeMediaPicker();
   initializeLocation();
@@ -135,13 +143,20 @@ function openCreatePostModal() {
 }
 
 function closeCreatePostModal() {
-  //createPostArea.style.display = 'none';
-  createPostArea.style.transform = 'translateY(100vh)';
   videoPlayer.style.display = 'none';
   imagePickerArea.style.display = 'none';
   canvasElement.style.display = 'none';
   locationLoader.style.display = 'none';
   locationBtn.style.display = 'inline';
+  captureButton.style.display = 'inline';
+  // here we stop our video transmission
+  videoPlayer.srcObject.getVideoTracks().forEach(function(track) {
+    track.stop();
+  });
+  // to update UI correctly, stop video takes a moment
+  setTimeout(function() {
+    createPostArea.style.transform = 'translateY(100vh)';
+  }, 1000);
 }
 
 shareImageButton.addEventListener('click', openCreatePostModal);
