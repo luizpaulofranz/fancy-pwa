@@ -48,4 +48,31 @@ workbox.routing.registerRoute('https://fancy-pwagram.firebaseio.com/posts.json',
   });
 });
 
+// offline fallback to an offline.html page
+workbox.routing.registerRoute( routeData => {
+  return (routeData.event.request.headers.get('accept').includes('text/html')); // only html pages requests (not CSS, images, etc)
+}, args => {
+  return caches.match(args.event.request)
+    .then( response => {
+      if (response) {
+        return response;
+      } else {
+        return fetch(args.event.request)
+          .then( res => {
+            return caches.open('dynamic')
+              .then( cache => {
+                cache.put(args.event.request.url, res.clone());
+                return res;
+              })
+          })
+          .catch( err => {
+            return caches.match('/offline.html')
+              .then( res => {
+                return res;
+              });
+          });
+      }
+    })
+});
+
 workbox.precaching.precacheAndRoute([]);
