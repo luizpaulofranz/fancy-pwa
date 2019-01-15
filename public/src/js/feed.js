@@ -150,9 +150,11 @@ function closeCreatePostModal() {
   locationBtn.style.display = 'inline';
   captureButton.style.display = 'inline';
   // here we stop our video transmission
-  videoPlayer.srcObject.getVideoTracks().forEach(function(track) {
-    track.stop();
-  });
+  if (videoPlayer.srcObject != null) {
+    videoPlayer.srcObject.getVideoTracks().forEach(function(track) {
+      track.stop();
+    })
+  }
   // to update UI correctly, stop video takes a moment
   setTimeout(function() {
     createPostArea.style.transform = 'translateY(100vh)';

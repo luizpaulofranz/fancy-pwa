@@ -6,7 +6,8 @@
   "scripts": {
     "start": "http-server -c-1",
     "workbox-wizard": "workbox wizard",
-    "generate-sw": "workbox generateSW"
+    "override-sw": "workbox generateSW",
+    "generate-sw": "workbox injectManifest"
   },
   "keywords": [
     "pwa",

@@ -1,24 +1,28 @@
-/**
- * Welcome to your Workbox-powered service worker!
- *
- * You'll need to register this file in your web app and you should
- * disable HTTP caching for this file too.
- * See https://goo.gl/nhQhGp
- *
- * The rest of the code is auto-generated. Please don't update this file
- * directly; instead, make changes to your Workbox build configuration
- * and re-run your build process.
- * See https://goo.gl/2aRDsh
- */
-
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
-/**
- * The workboxSW.precacheAndRoute() method efficiently caches and responds to
- * requests for URLs in the manifest.
- * See https://goo.gl/S9QRab
- */
-self.__precacheManifest = [
+// that's how we create our caches by routes
+workbox.routing.registerRoute(
+  new RegExp('/.*(?:googleapis|gstatic)\.com.*$/'),
+  workbox.strategies.staleWhileRevalidate({
+    cacheName: 'google-fonts',
+  }), // our cache then network strategy
+);
+
+// caching specific CDN
+workbox.routing.registerRoute( 'https://cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.3.0/material.indigo-pink.min.css',
+  workbox.strategies.staleWhileRevalidate({
+    cacheName: 'material-css',
+  }), // our cache then network strategy
+);
+
+workbox.routing.registerRoute(
+  new RegExp('/.*(?:firebase\.googleapis)\.com.*$/'),
+  workbox.strategies.staleWhileRevalidate({
+    cacheName: 'post-images',
+  }), // our cache then network strategy
+);
+
+workbox.precaching.precacheAndRoute([
   {
     "url": "404.html",
     "revision": "0a27a4163254fc8fce870c8cc3a3f94f"
@@ -61,7 +65,7 @@ self.__precacheManifest = [
   },
   {
     "url": "src/js/feed.js",
-    "revision": "72586803983c3b0e1a79b0b266a97fc9"
+    "revision": "a2cb771631815406e377221f7569ce8f"
   },
   {
     "url": "src/js/fetch.js",
@@ -78,6 +82,10 @@ self.__precacheManifest = [
   {
     "url": "src/js/promise.js",
     "revision": "10c2238dcd105eb23f703ee53067417f"
+  },
+  {
+    "url": "sw-base.js",
+    "revision": "2384829660c63790e878dfdf718cc0b5"
   },
   {
     "url": "sw.js",
@@ -99,6 +107,4 @@ self.__precacheManifest = [
     "url": "src/images/sf-boat.jpg",
     "revision": "0f282d64b0fb306daf12050e812d6a19"
   }
-].concat(self.__precacheManifest || []);
-workbox.precaching.suppressWarnings();
-workbox.precaching.precacheAndRoute(self.__precacheManifest, {});
+]);
