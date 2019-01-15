@@ -10,7 +10,8 @@ if (!window.Promise) {
 // check if the browser supports serviceWorker
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker
-        .register('/sw.js')
+        //.register('/sw.js')
+        .register('/service-worker.js')
         .then(()=>{
             console.log('Service Worker registered!');
         });
