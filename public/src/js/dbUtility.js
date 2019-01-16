@@ -1,4 +1,5 @@
 // here we use idexedDB throug idb.js lib
+// idb.js IS INCLUDED BEFORE THIS FILE IN INDEX.HTML
 // name, version, and callback wich returns a promise
 let dbPromise = idb.open('posts-store', 1, db => {
     // check if exists

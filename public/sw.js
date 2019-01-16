@@ -347,4 +347,4 @@ self.addEventListener('push', function(event) {
         // and here we show the notification
       self.registration.showNotification(data.title, options)
     );
-  });
+});

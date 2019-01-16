@@ -1,10 +1,10 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
-importScripts('/src/js/idb.js');
-importScripts('/src/js/dbUtility.js');
+importScripts('/src/js/idb.min.js');
+importScripts('/src/js/dbUtility.min.js');
 
 // that's how we create our caches by routes
 workbox.routing.registerRoute(
-  new RegExp('/.*(?:googleapis|gstatic)\.com.*$/'),
+  new RegExp('.*(?:googleapis|gstatic)\.com.*$'),
   workbox.strategies.staleWhileRevalidate({
     cacheName: 'google-fonts',
     cacheExpiration: {
@@ -23,7 +23,7 @@ workbox.routing.registerRoute( 'https://cdnjs.cloudflare.com/ajax/libs/material-
 
 // caching firebase
 workbox.routing.registerRoute(
-  new RegExp('/.*(?:firebasestorage\.googleapis)\.com.*$/'),
+  new RegExp('.*(?:firebasestorage\.googleapis)\.com.*$'),
   workbox.strategies.staleWhileRevalidate({
     cacheName: 'post-images',
   }), // our cache then network strategy

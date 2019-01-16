@@ -6,4 +6,4 @@ You need [Node.js](https://nodejs.org).
 
 Once Node.js is installed, run `npm install` to install all required dependencies.
 
-Finally, run `npm start` to start the development server to see the running application.
+Finally, run `npm run build` and then `npm start` to start the development server to see the running application.
