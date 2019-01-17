@@ -187,7 +187,6 @@ function clearCards() {
 
 // dummy test card example
 function createCard(data) {
-  console.log('createCard: '+data);
   var cardWrapper = document.createElement('div');
   cardWrapper.className = 'shared-moment-card mdl-card mdl-shadow--2dp';
   var cardTitle = document.createElement('div');
@@ -216,7 +215,6 @@ function createCard(data) {
 
 function updateUi(data) {
   clearCards();
-  console.log('AQUII: ', data)
   for (let elem of data) {
     //console.log('updateUi: '+elem);
     createCard(elem);
@@ -252,7 +250,6 @@ fetch(url)
   })
   .then(function(data) {
     networkDataReceived = true;
-    console.log('Network response.');
     updateUi(firebaseReturnHelper(data));
   });
 /*
@@ -274,7 +271,6 @@ if ('cache' in window) {
 if ('indexedDB' in window) {
   // readAll is in dbUtility.js
   readAll('posts').then(data => {
-    console.log('Cache response.');
     if (!networkDataReceived) {
       updateUi(data);
     }

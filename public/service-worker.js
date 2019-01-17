@@ -1,10 +1,10 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
-importScripts('/src/js/idb.js');
-importScripts('/src/js/dbUtility.js');
+importScripts('/src/js/idb.min.js');
+importScripts('/src/js/dbUtility.min.js');
 
 // that's how we create our caches by routes
 workbox.routing.registerRoute(
-  new RegExp('/.*(?:googleapis|gstatic)\.com.*$/'),
+  new RegExp('.*(?:googleapis|gstatic)\.com.*$'),
   workbox.strategies.staleWhileRevalidate({
     cacheName: 'google-fonts',
     cacheExpiration: {
@@ -23,7 +23,7 @@ workbox.routing.registerRoute( 'https://cdnjs.cloudflare.com/ajax/libs/material-
 
 // caching firebase
 workbox.routing.registerRoute(
-  new RegExp('/.*(?:firebasestorage\.googleapis)\.com.*$/'),
+  new RegExp('.*(?:firebasestorage\.googleapis)\.com.*$'),
   workbox.strategies.staleWhileRevalidate({
     cacheName: 'post-images',
   }), // our cache then network strategy
@@ -77,24 +77,20 @@ workbox.routing.registerRoute( routeData => {
 
 workbox.precaching.precacheAndRoute([
   {
-    "url": "404.html",
-    "revision": "0a27a4163254fc8fce870c8cc3a3f94f"
-  },
-  {
     "url": "favicon.ico",
     "revision": "2cab47d9e04d664d93c8d91aec59e812"
   },
   {
     "url": "index.html",
-    "revision": "6d4b50d602791d6a7a791d551c4d010c"
+    "revision": "418d46e7a79a81abfdfe7f3a7b03bfa3"
   },
   {
     "url": "manifest.json",
-    "revision": "2fd5cd41fb94573af4b7936b717a7546"
+    "revision": "363fb96d59fb97a7bc70fe02dae3c503"
   },
   {
     "url": "offline.html",
-    "revision": "72ee1030313de4cad458dd730926967f"
+    "revision": "02c54a46fe37185381b01b8a06791bb1"
   },
   {
     "url": "src/css/app.css",
@@ -109,55 +105,172 @@ workbox.precaching.precacheAndRoute([
     "revision": "1c6d81b27c9d423bece9869b07a7bd73"
   },
   {
-    "url": "src/js/app.js",
-    "revision": "116bfbea9bc09e99e8d56d0645d45453"
+    "url": "src/images/main-image-lg.jpg",
+    "revision": "3c2efc01408968735a1bd98dcf80f88d"
   },
   {
-    "url": "src/js/dbUtility.js",
-    "revision": "25fc8a0901d50825a7bec4a0dcd8b296"
+    "url": "src/images/main-image-sm.jpg",
+    "revision": "fed16b290f9d329b29571199d40059ce"
   },
   {
-    "url": "src/js/feed.js",
-    "revision": "a2cb771631815406e377221f7569ce8f"
+    "url": "src/images/main-image.jpg",
+    "revision": "58a215ab2d1922c990cce03e6c56cb24"
   },
   {
-    "url": "src/js/fetch.js",
-    "revision": "6b82fbb55ae19be4935964ae8c338e92"
+    "url": "src/images/sf-boat.jpg",
+    "revision": "0f282d64b0fb306daf12050e812d6a19"
   },
   {
-    "url": "src/js/idb.js",
-    "revision": "a66942528a8af114e8a0ae4b517ab0be"
+    "url": "src/js/app.min.js",
+    "revision": "68dc24fdf2a8f30575ecabff8772317e"
+  },
+  {
+    "url": "src/js/dbUtility.min.js",
+    "revision": "0ace1ac156abb2453eac288a1f5510b6"
+  },
+  {
+    "url": "src/js/feed.min.js",
+    "revision": "7ca3fb6e7941aba4074590c073a72191"
+  },
+  {
+    "url": "src/js/fetch.min.js",
+    "revision": "fe42b963014ef7b49642dc5e78031214"
+  },
+  {
+    "url": "src/js/idb.min.js",
+    "revision": "a9992e6703c604edb50bc82dfd9e189b"
   },
   {
     "url": "src/js/material.min.js",
     "revision": "713af0c6ce93dbbce2f00bf0a98d0541"
   },
   {
-    "url": "src/js/promise.js",
-    "revision": "10c2238dcd105eb23f703ee53067417f"
+    "url": "src/js/promise.min.js",
+    "revision": "385e8f6ccf4db2216062e1653e51573d"
   },
   {
-    "url": "sw-base.js",
-    "revision": "b8cb6b476f2a62f12ae79f49a9e1f83b"
+    "url": "src/js/idb.js",
+    "revision": "a66942528a8af114e8a0ae4b517ab0be"
   },
   {
-    "url": "sw.js",
-    "revision": "bfa839a7980d845dff75bac200c5d270"
-  },
-  {
-    "url": "src/images/main-image-lg.jpg",
-    "revision": "31b19bffae4ea13ca0f2178ddb639403"
-  },
-  {
-    "url": "src/images/main-image-sm.jpg",
-    "revision": "c6bb733c2f39c60e3c139f814d2d14bb"
-  },
-  {
-    "url": "src/images/main-image.jpg",
-    "revision": "5c66d091b0dc200e8e89e56c589821fb"
-  },
-  {
-    "url": "src/images/sf-boat.jpg",
-    "revision": "0f282d64b0fb306daf12050e812d6a19"
+    "url": "src/js/dbUtility.js",
+    "revision": "8968747058aeb289b80471974e3540bb"
   }
 ]);
+
+
+// background sync
+// triggers when we have connection and we have events to sync (sync.register(...) on feed.js)
+self.addEventListener('sync', function (event) {
+  console.log('[Service Worker] Background syncing', event);
+  // check what back sync is
+  if (event.tag === 'sync-new-posts') {
+      const url = 'https://us-central1-fancy-pwagram.cloudfunctions.net/storePostsData';
+      console.log('[Service Worker] Syncing new Posts');
+      // force waiting the data sending
+      event.waitUntil(
+          // get all our requests stored in indexedDB
+          readAll('sync-posts')
+              .then( data => {
+                  // loop throug our stored requests, fetching and the deleting
+                  for (var dt of data) {
+                      // thats how we simulate a POST form submit
+                      let postData = new FormData();
+                      postData.append('id', dt.id);
+                      postData.append('title', dt.title);
+                      postData.append('location', dt.location);
+                      postData.append('rawLocationLat', dt.rawLocation.lat);
+                      postData.append('rawLocationLng', dt.rawLocation.lng);
+                      postData.append('file', dt.picture, dt.id+'.png');
+
+                      fetch(url, {
+                          method: 'POST',
+                          body: postData
+                      })
+                      // after fetc, we delete de data
+                      .then( res => {
+                          console.log('Sent data', res);
+                          if (res.ok) {
+                              res.json().then(resData => {
+                                  // here we delete the data by ID returned by our custom firebase endpoint
+                                  deleteRow('sync-posts', resData.id);
+                                  // and here clear the endpoint cache to re-save the cache
+                                  caches.open(CACHE_DYNAMIC_NAME).then(cache => {
+                                      return cache.delete('/posts.json');
+                                  });
+                              })
+                          }
+                      })
+                      .catch(function (err) {
+                          console.log('Error while sending data', err);
+                      });
+                  }
+
+              })
+      );
+  }
+});
+
+// notification actions clicks handlers (see app.js displayConfirmNotification...)
+self.addEventListener('notificationclick', event => {
+  const notification = event.notification;
+  const action = event.action;
+
+  //console.log(notification);
+
+  // tha's how we handle with multiple actions on notification
+  if (action == 'confirm') {
+      //console.log('Confirm was clicked!');
+  } else {
+      //console.log(action);
+      event.waitUntil(
+          // clients is a SW variable, and contains all "clients" of THIS SW
+          clients.matchAll().then( clis => {
+              // we get the first client which is visible, normally the browser, in this case is the only client
+              const client = clis.find(function(c) {
+                  return c.visibilityState === 'visible';
+              });
+              // and here we navigate our PWA to the URL passed by the server
+              if (client !== undefined) {
+                  client.navigate(notification.data.url);
+                  client.focus();
+              } else {
+                  clients.openWindow(notification.data.url);
+              }
+              notification.close();
+          })
+      );
+  }
+
+  notification.close();
+});
+// we can react to close without click above on notifications (swipe the notification out)
+self.addEventListener('notificationclose', event => {
+  console.log("Notification was closed!",event);
+});
+
+// this is the event which listen to PUSH NOTIFICATIONS
+self.addEventListener('push', function(event) {
+  //console.log('Push Notification received', event);
+  // receive data from server
+  let data;
+
+  if (event.data) {
+    data = JSON.parse(event.data.text());
+  }
+
+  var options = {
+    body: data.content,
+    icon: '/src/images/icons/app-icon-96x96.png',
+    badge: '/src/images/icons/app-icon-96x96.png',
+    // here we send aditional data to our notification, see "notificationclick" event
+    data: {
+      url: data.openUrl
+    }
+  };
+
+  event.waitUntil(
+      // and here we show the notification
+    self.registration.showNotification(data.title, options)
+  );
+});

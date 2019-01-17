@@ -1,6 +1,6 @@
 {
-    "name": "Instagram as Progressive Web App",
-    "short_name": "PWAGram",
+    "name": "LOTR based Instagram as Progressive Web App",
+    "short_name": "LOTR Instagram",
     "icons": [
         {
             "src":"/src/images/icons/app-icon-48x48.png",
